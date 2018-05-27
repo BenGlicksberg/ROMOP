@@ -11,9 +11,6 @@ library(odbc)
 
 
 
-
-
-
 #############################
 ###### INITIALIZATION #######
 #############################
@@ -103,11 +100,18 @@ summarizeDemographics <- function(ptDemo) {
 # return table of available domains and vocabularies
 showDataTypes <- function() {
 
+  if (exists("dataOntology")) { # ensure dataOntology exists
+  
   dataTypes = dataOntology[domain_id %in% c("Condition","Observation","Measurement","Device","Procedure","Drug"),c("domain_id", "vocabulary_id")]
   dataTypes = dataTypes[!duplicated(dataTypes)]
   dataTypes = dataTypes[order(domain_id),]
 
   return(dataTypes)
+  
+  else { #endif dataOntology exists
+    message("Error: dataOntology does not exist. Please first run makeDataOntology.")
+  } 
+  
 }
 
 
@@ -161,7 +165,7 @@ unpackAndMap <- function(vocabularies_input, codes_input) {
   # match to one another
   dataCriteria <- data.table(vocabularies = vocabularies_split, codes = codes_split)
 
-  dataCriteria <- dataCriteria[ , list( # unpack codes
+  dataCriteria <- dataCriteria[, list( # unpack codes
     codes = trimws(unlist(strsplit(codes, ";")))),
     by = vocabularies]
 
@@ -179,7 +183,7 @@ identifySynonyms <- function(codesFormatted) {
   synonymData <- sqlQuery(synonymQuery)
   synonymData <- data.table(synonymData)
   synonymData <- synonymData[invalid_reason == ""]
-  synonymData <- synonymData[ ,-"invalid_reason"]
+  synonymData <- synonymData[,-"invalid_reason"]
 
   # check for "Maps to" or "%- RxNorm%" or "%- SNOMED%" | standard concepts *** decision
   synonymDataFiltered <- synonymData[(relationship_id == "Maps to") | (grepl("- RxNorm",relationship_id)) | (grepl("- SNOMED",relationship_id)) ]
@@ -276,7 +280,7 @@ identifyPatientsAND <- function(criteriaMapped, synonymDataFiltered, mappingData
   names(mappingDataInfo)[names(mappingDataInfo) == 'vocabulary_id'] <- 'mapped_vocabulary_id'
   names(mappingDataInfo)[names(mappingDataInfo) == 'concept_name'] <- 'mapped_concept_name'
 
-  synonymMapped <- merge(mappingDataInfo[ ,c("descendant_concept_id","ancestor_concept_id","mapped_vocabulary_id","mapped_concept_name")], synonymDataFiltered[ ,c("concept_id_1","concept_id_2")], by.x = "ancestor_concept_id", by.y = "concept_id_2", allow.cartesian=TRUE)
+  synonymMapped <- merge(mappingDataInfo[,c("descendant_concept_id","ancestor_concept_id","mapped_vocabulary_id","mapped_concept_name")], synonymDataFiltered[,c("concept_id_1","concept_id_2")], by.x = "ancestor_concept_id", by.y = "concept_id_2", allow.cartesian=TRUE)
   synonymMapped <- synonymMapped[!duplicated(synonymMapped)]
 
   combinedMapped <- merge(synonymMapped, criteriaMapped, by.x = "concept_id_1", by.y = "concept_id", allow.cartesian=TRUE)
@@ -388,7 +392,7 @@ makeDataOntology <- function(declare=TRUE, store_ontology=FALSE) {
   conceptQuery <- "SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, concept_code, standard_concept FROM concept WHERE invalid_reason = '';"
   dataOntology <- sqlQuery(conceptQuery)
   dataOntology <- data.table(dataOntology)
-  dataOntology <- dataOntology[ ,-"standard_concept"]
+  dataOntology <- dataOntology[,-"standard_concept"]
 
   }
 
@@ -883,7 +887,7 @@ getDemographics <-function(patient_list=NULL, declare=TRUE) { # patient list wil
     ptDemo <- markNAasUnknown(ptDemo,"Ethnicity",declare)
 
     ### clean up extra columns
-    ptDemo <- ptDemo[ ,-c("ethnicity_concept_id","race_concept_id","gender_concept_id")]
+    ptDemo <- ptDemo[,-c("ethnicity_concept_id","race_concept_id","gender_concept_id")]
 
     # add in death date
     ptDeath <- sqlQuery(deathqueryStatement)
@@ -924,18 +928,18 @@ getEncounters <- function(patient_list, declare=TRUE) {
     ptEncs <- data.table(ptEncs) # convert to data.table
 
     # merge in relevant information concept ids
-    ptEncs <- merge(ptEncs,dataOntology[ ,c("concept_id","concept_name")], by.x="visit_concept_id", by.y="concept_id", all.x=TRUE)
+    ptEncs <- merge(ptEncs,dataOntology[,c("concept_id","concept_name")], by.x="visit_concept_id", by.y="concept_id", all.x=TRUE)
     names(ptEncs)[names(ptEncs) == 'concept_name'] <- 'visit_concept' # rename column
-    ptEncs <- ptEncs[ ,-"visit_concept_id"]
-    ptEncs <- merge(ptEncs,dataOntology[ ,c("concept_id","concept_name")], by.x="visit_source_concept_id", by.y="concept_id", all.x=TRUE)
+    ptEncs <- ptEncs[,-"visit_concept_id"]
+    ptEncs <- merge(ptEncs,dataOntology[,c("concept_id","concept_name")], by.x="visit_source_concept_id", by.y="concept_id", all.x=TRUE)
     names(ptEncs)[names(ptEncs) == 'concept_name'] <- 'visit_source_concept' # rename column
-    ptEncs <- ptEncs[ ,-"visit_source_concept_id"]
-    ptEncs <- merge(ptEncs,dataOntology[ ,c("concept_id","concept_name")], by.x="admitting_source_concept_id", by.y="concept_id", all.x=TRUE)
+    ptEncs <- ptEncs[,-"visit_source_concept_id"]
+    ptEncs <- merge(ptEncs,dataOntology[,c("concept_id","concept_name")], by.x="admitting_source_concept_id", by.y="concept_id", all.x=TRUE)
     names(ptEncs)[names(ptEncs) == 'concept_name'] <- 'admitting_concept' # rename column
-    ptEncs <- ptEncs[ ,-"admitting_source_concept_id"]
-    ptEncs <- merge(ptEncs,dataOntology[ ,c("concept_id","concept_name")], by.x="discharge_to_concept_id", by.y="concept_id", all.x=TRUE)
+    ptEncs <- ptEncs[,-"admitting_source_concept_id"]
+    ptEncs <- merge(ptEncs,dataOntology[,c("concept_id","concept_name")], by.x="discharge_to_concept_id", by.y="concept_id", all.x=TRUE)
     names(ptEncs)[names(ptEncs) == 'concept_name'] <- 'discharge_concept' # rename column
-    ptEncs <- ptEncs[ ,-"discharge_to_concept_id"]
+    ptEncs <- ptEncs[,-"discharge_to_concept_id"]
 
     return(ptEncs)
 
@@ -1001,26 +1005,26 @@ getObservations <- function(patient_list, declare=TRUE) {
     observationTableOntology <- dataOntology[domain_id=="Observation"]
 
     # format clinical data
-    ptObsData <- merge(ptObsData, observationTableOntology[ ,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="observation_concept_id",by.y="concept_id",all.x=TRUE)
+    ptObsData <- merge(ptObsData, observationTableOntology[,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="observation_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptObsData)[names(ptObsData) == 'concept_code'] <- 'observation_concept_code' # rename column
     names(ptObsData)[names(ptObsData) == 'concept_name'] <- 'observation_concept_name' # rename column
     names(ptObsData)[names(ptObsData) == 'vocabulary_id'] <- 'observation_concept_vocabulary' # rename column
-    ptObsData <- ptObsData[ ,-"observation_concept_id"]
+    ptObsData <- ptObsData[,-"observation_concept_id"]
 
-    ptObsData <- merge(ptObsData, observationTableOntology[ ,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="observation_source_concept_id",by.y="concept_id",all.x=TRUE)
+    ptObsData <- merge(ptObsData, observationTableOntology[,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="observation_source_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptObsData)[names(ptObsData) == 'concept_code'] <- 'observation_source_code' # rename column
     names(ptObsData)[names(ptObsData) == 'concept_name'] <- 'observation_source_name' # rename column
     names(ptObsData)[names(ptObsData) == 'vocabulary_id'] <- 'observation_source_vocabulary' # rename column
-    ptObsData <- ptObsData[ ,-"observation_source_concept_id"]
+    ptObsData <- ptObsData[,-"observation_source_concept_id"]
 
     # format metadata
-    ptObsData <- merge(ptObsData,dataOntology[ ,c("concept_id","concept_name")],by.x="observation_type_concept_id",by.y="concept_id", all.x=TRUE)
+    ptObsData <- merge(ptObsData,dataOntology[,c("concept_id","concept_name")],by.x="observation_type_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptObsData)[names(ptObsData) == 'concept_name'] <- 'observation_type' # rename column
-    ptObsData <- ptObsData[ ,-"observation_type_concept_id"]
+    ptObsData <- ptObsData[,-"observation_type_concept_id"]
 
-    ptObsData=merge(ptObsData,dataOntology[ ,c("concept_id","concept_name")],by.x="value_as_concept_id",by.y="concept_id", all.x=TRUE)
+    ptObsData=merge(ptObsData,dataOntology[,c("concept_id","concept_name")],by.x="value_as_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptObsData)[names(ptObsData) == 'concept_name'] <- 'value_concept' # rename column
-    ptObsData <- ptObsData[ ,-"value_as_concept_id"]
+    ptObsData <- ptObsData[,-"value_as_concept_id"]
 
     if (declare==TRUE) {message("Observation data formatted successfully ")}
 
@@ -1060,25 +1064,25 @@ getConditions <- function(patient_list, declare=TRUE) {
     conditionTableOntology <- dataOntology[grep("Condition",domain_id)]
 
     # format clinical data
-    ptCondData <- merge(ptCondData, conditionTableOntology[ ,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="condition_concept_id",by.y="concept_id",all.x=TRUE)
+    ptCondData <- merge(ptCondData, conditionTableOntology[,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="condition_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptCondData)[names(ptCondData) == 'concept_code'] <- 'condition_concept_code' # rename column
     names(ptCondData)[names(ptCondData) == 'concept_name'] <- 'condition_concept_name' # rename column
     names(ptCondData)[names(ptCondData) == 'vocabulary_id'] <- 'condition_concept_vocabulary' # rename column
-    ptCondData <- ptCondData[ ,-"condition_concept_id"]
+    ptCondData <- ptCondData[,-"condition_concept_id"]
 
-    ptCondData <- merge(ptCondData, conditionTableOntology[ ,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="condition_source_concept_id",by.y="concept_id",all.x=TRUE)
+    ptCondData <- merge(ptCondData, conditionTableOntology[,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="condition_source_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptCondData)[names(ptCondData) == 'concept_code'] <- 'condition_source_code' # rename column
     names(ptCondData)[names(ptCondData) == 'concept_name'] <- 'condition_source_name' # rename column
     names(ptCondData)[names(ptCondData) == 'vocabulary_id'] <- 'condition_source_vocabulary' # rename column
-    ptCondData <- ptCondData[ ,-"condition_source_concept_id"]
+    ptCondData <- ptCondData[,-"condition_source_concept_id"]
 
     # format metadatadata
-    ptCondData <- merge(ptCondData,dataOntology[ ,c("concept_id","concept_name")],by.x="condition_type_concept_id",by.y="concept_id", all.x=TRUE)
+    ptCondData <- merge(ptCondData,dataOntology[,c("concept_id","concept_name")],by.x="condition_type_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptCondData)[names(ptCondData) == 'concept_name'] <- 'condition_type' # rename column
-    ptCondData <- ptCondData[ ,-"condition_type_concept_id"]
-    ptCondData <- merge(ptCondData,dataOntology[ ,c("concept_id","concept_name")],by.x="condition_status_concept_id",by.y="concept_id", all.x=TRUE)
+    ptCondData <- ptCondData-"condition_type_concept_id"]
+    ptCondData <- merge(ptCondData,dataOntology[,c("concept_id","concept_name")],by.x="condition_status_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptCondData)[names(ptCondData) == 'concept_name'] <- 'condition_status_type' # rename column
-    ptCondData <- ptCondData[ ,-"condition_status_concept_id"]
+    ptCondData <- ptCondData[,-"condition_status_concept_id"]
 
     if (declare==TRUE) {message("Condition data formatted successfully. ")}
 
@@ -1113,22 +1117,22 @@ getProcedures <- function(patient_list, declare=TRUE){
     procedureTableOntology <- dataOntology[domain_id=="Procedure"]
 
     # format clinical data
-    ptProcData <- merge(ptProcData, procedureTableOntology[ ,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="procedure_concept_id",by.y="concept_id",all.x=TRUE)
+    ptProcData <- merge(ptProcData, procedureTableOntology[,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="procedure_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptProcData)[names(ptProcData) == 'concept_code'] <- 'procedure_concept_code' # rename column
     names(ptProcData)[names(ptProcData) == 'concept_name'] <- 'procedure_concept_name' # rename column
     names(ptProcData)[names(ptProcData) == 'vocabulary_id'] <- 'procedure_concept_vocabulary' # rename column
-    ptProcData <- ptProcData[ ,-"procedure_concept_id"]
+    ptProcData <- ptProcData[,-"procedure_concept_id"]
 
-    ptProcData <- merge(ptProcData, procedureTableOntology[ ,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="procedure_source_concept_id",by.y="concept_id",all.x=TRUE)
+    ptProcData <- merge(ptProcData, procedureTableOntology[,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="procedure_source_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptProcData)[names(ptProcData) == 'concept_code'] <- 'procedure_source_code' # rename column
     names(ptProcData)[names(ptProcData) == 'concept_name'] <- 'procedure_source_name' # rename column
     names(ptProcData)[names(ptProcData) == 'vocabulary_id'] <- 'procedure_source_vocabulary' # rename column
-    ptProcData <- ptProcData[ ,-"procedure_source_concept_id"]
+    ptProcData <- ptProcData[,-"procedure_source_concept_id"]
 
     # format metadata
-    ptProcData <- merge(ptProcData,dataOntology[ ,c("concept_id","concept_name")],by.x="procedure_type_concept_id",by.y="concept_id", all.x=TRUE)
+    ptProcData <- merge(ptProcData,dataOntology[,c("concept_id","concept_name")],by.x="procedure_type_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptProcData)[names(ptProcData) == 'concept_name'] <- 'procedure_type' # rename column
-    ptProcData <- ptProcData[ ,-"procedure_type_concept_id"]
+    ptProcData <- ptProcData[,-"procedure_type_concept_id"]
 
     if (declare==TRUE) {message("Procedure data formatted successfully.")}
 
@@ -1164,25 +1168,25 @@ getMedications <- function(patient_list, declare=TRUE) {
     medicationTableOntology <- dataOntology[domain_id=="Drug"]
 
     # format clinical data
-    ptsMedsData <- merge(ptsMedsData, medicationTableOntology[ ,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="drug_concept_id",by.y="concept_id",all.x=TRUE)
+    ptsMedsData <- merge(ptsMedsData, medicationTableOntology[,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="drug_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptsMedsData)[names(ptsMedsData) == 'concept_code'] <- 'medication_concept_code' # rename column
     names(ptsMedsData)[names(ptsMedsData) == 'concept_name'] <- 'medication_concept_name' # rename column
     names(ptsMedsData)[names(ptsMedsData) == 'vocabulary_id'] <- 'medication_concept_vocabulary' # rename column
-    ptsMedsData <- ptsMedsData[ ,-"drug_concept_id"]
+    ptsMedsData <- ptsMedsData[,-"drug_concept_id"]
 
-    ptsMedsData <- merge(ptsMedsData, medicationTableOntology[ ,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="drug_source_concept_id",by.y="concept_id",all.x=TRUE)
+    ptsMedsData <- merge(ptsMedsData, medicationTableOntology[,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="drug_source_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptsMedsData)[names(ptsMedsData) == 'concept_code'] <- 'medication_source_code' # rename column
     names(ptsMedsData)[names(ptsMedsData) == 'concept_name'] <- 'medication_source_name' # rename column
     names(ptsMedsData)[names(ptsMedsData) == 'vocabulary_id'] <- 'medication_source_vocabulary' # rename column
-    ptsMedsData <- ptsMedsData[ ,-"drug_source_concept_id"]
+    ptsMedsData <- ptsMedsData[,-"drug_source_concept_id"]
 
     # format metadata
-    ptsMedsData <- merge(ptsMedsData,dataOntology[ ,c("concept_id","concept_name")],by.x="drug_type_concept_id",by.y="concept_id", all.x=TRUE)
+    ptsMedsData <- merge(ptsMedsData,dataOntology[,c("concept_id","concept_name")],by.x="drug_type_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptsMedsData)[names(ptsMedsData) == 'concept_name'] <- 'drug_type' # rename column
-    ptsMedsData <- ptsMedsData[ ,-"drug_type_concept_id"]
-    ptsMedsData <- merge(ptsMedsData,dataOntology[ ,c("concept_id","concept_name")],by.x="route_concept_id",by.y="concept_id", all.x=TRUE)
+    ptsMedsData <- ptsMedsData[,-"drug_type_concept_id"]
+    ptsMedsData <- merge(ptsMedsData,dataOntology[,c("concept_id","concept_name")],by.x="route_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptsMedsData)[names(ptsMedsData) == 'concept_name'] <- 'route_concept' # rename column
-    ptsMedsData <- ptsMedsData[ ,-"route_concept_id"]
+    ptsMedsData <- ptsMedsData[,-"route_concept_id"]
 
     if (declare==TRUE) {message("Medication data formatted successfully.")}
 
@@ -1218,28 +1222,28 @@ getMeasurements <- function(patient_list, declare=TRUE) {
 
 
     # format clinical data
-    ptMeasData <- merge(ptMeasData, measurementTableOntology[ ,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="measurement_concept_id",by.y="concept_id",all.x=TRUE)
+    ptMeasData <- merge(ptMeasData, measurementTableOntology[,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="measurement_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptMeasData)[names(ptMeasData) == 'concept_code'] <- 'measurement_concept_code' # rename column
     names(ptMeasData)[names(ptMeasData) == 'concept_name'] <- 'measurement_concept_name' # rename column
     names(ptMeasData)[names(ptMeasData) == 'vocabulary_id'] <- 'measurement_concept_vocabulary' # rename column
-    ptMeasData <- ptMeasData[ ,-"measurement_concept_id"]
+    ptMeasData <- ptMeasData[,-"measurement_concept_id"]
 
-    ptMeasData <- merge(ptMeasData, measurementTableOntology[ ,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="measurement_source_concept_id",by.y="concept_id",all.x=TRUE)
+    ptMeasData <- merge(ptMeasData, measurementTableOntology[,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="measurement_source_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptMeasData)[names(ptMeasData) == 'concept_code'] <- 'measurement_source_code' # rename column
     names(ptMeasData)[names(ptMeasData) == 'concept_name'] <- 'measurement_source_name' # rename column
     names(ptMeasData)[names(ptMeasData) == 'vocabulary_id'] <- 'measurement_source_vocabulary' # rename column
-    ptMeasData <- ptMeasData[ ,-"measurement_source_concept_id"]
+    ptMeasData <- ptMeasData[,-"measurement_source_concept_id"]
 
     # format metadata
-    ptMeasData <- merge(ptMeasData,dataOntology[ ,c("concept_id","concept_name")],by.x="measurement_type_concept_id",by.y="concept_id", all.x=TRUE)
+    ptMeasData <- merge(ptMeasData,dataOntology[,c("concept_id","concept_name")],by.x="measurement_type_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptMeasData)[names(ptMeasData) == 'concept_name'] <- 'measurement_type' # rename column
-    ptMeasData <- ptMeasData[ ,-"measurement_type_concept_id"]
-    ptMeasData <- merge(ptMeasData,dataOntology[ ,c("concept_id","concept_name")],by.x="value_as_concept_id",by.y="concept_id", all.x=TRUE)
+    ptMeasData <- ptMeasData[,-"measurement_type_concept_id"]
+    ptMeasData <- merge(ptMeasData,dataOntology[,c("concept_id","concept_name")],by.x="value_as_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptMeasData)[names(ptMeasData) == 'concept_name'] <- 'value_concept' # rename column
-    ptMeasData <- ptMeasData[ ,-"value_as_concept_id"]
-    ptMeasData <- merge(ptMeasData,dataOntology[ ,c("concept_id","concept_name")],by.x="unit_concept_id",by.y="concept_id", all.x=TRUE)
+    ptMeasData <- ptMeasData[,-"value_as_concept_id"]
+    ptMeasData <- merge(ptMeasData,dataOntology[,c("concept_id","concept_name")],by.x="unit_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptMeasData)[names(ptMeasData) == 'concept_name'] <- 'unit_concept' # rename column
-    ptMeasData <- ptMeasData[ ,-"unit_concept_id"]
+    ptMeasData <- ptMeasData[,-"unit_concept_id"]
 
     if (declare==TRUE) {message("Measurement data formatted successfully.")}
 
@@ -1273,22 +1277,22 @@ getDevices <- function(patient_list, declare=TRUE) {
     deviceTableOntology = dataOntology[grep("Device",domain_id)]
 
     # format clinical data
-    ptDeviceData <- merge(ptDeviceData, deviceTableOntology[ ,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="device_concept_id",by.y="concept_id",all.x=TRUE)
+    ptDeviceData <- merge(ptDeviceData, deviceTableOntology[,c("concept_id","vocabulary_id","concept_code","concept_name")], by.x="device_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptDeviceData)[names(ptDeviceData) == 'concept_code'] <- 'device_concept_code' # rename column
     names(ptDeviceData)[names(ptDeviceData) == 'concept_name'] <- 'device_concept_name' # rename column
     names(ptDeviceData)[names(ptDeviceData) == 'vocabulary_id'] <- 'device_concept_vocabulary' # rename column
-    ptDeviceData <- ptDeviceData[ ,-"device_concept_id"]
+    ptDeviceData <- ptDeviceData[,-"device_concept_id"]
 
-    ptDeviceData <- merge(ptDeviceData, deviceTableOntology[ ,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="device_source_concept_id",by.y="concept_id",all.x=TRUE)
+    ptDeviceData <- merge(ptDeviceData, deviceTableOntology[,c("concept_id","vocabulary_id", "concept_code","concept_name")], by.x="device_source_concept_id",by.y="concept_id",all.x=TRUE)
     names(ptDeviceData)[names(ptDeviceData) == 'concept_code'] <- 'device_source_code' # rename column
     names(ptDeviceData)[names(ptDeviceData) == 'concept_name'] <- 'device_source_name' # rename column
     names(ptDeviceData)[names(ptDeviceData) == 'vocabulary_id'] <- 'device_source_vocabulary' # rename column
-    ptDeviceData <- ptDeviceData[ ,-"device_source_concept_id"]
+    ptDeviceData <- ptDeviceData[,-"device_source_concept_id"]
 
     # format metadata
-    ptDeviceData <- merge(ptDeviceData,dataOntology[ ,c("concept_id","concept_name")],by.x="device_type_concept_id",by.y="concept_id", all.x=TRUE)
+    ptDeviceData <- merge(ptDeviceData,dataOntology[,c("concept_id","concept_name")],by.x="device_type_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptDeviceData)[names(ptDeviceData) == 'concept_name'] <- 'device_type' # rename column
-    ptDeviceData <- ptDeviceData[ ,-"device_type_concept_id"]
+    ptDeviceData <- ptDeviceData[,-"device_type_concept_id"]
 
     if (declare==TRUE) {message("Device data formatted successfully.")}
 

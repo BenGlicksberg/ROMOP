@@ -28,7 +28,6 @@ checkCredentialsExist <- function() {
 
   }else{
     pass <- FALSE
-    message("Failed to retrieve crednetials from .Renviron. Please ensure that the file exists and is formatted correctly (please refer to ReadMe)")
   }
 
   return(pass)
@@ -59,25 +58,27 @@ checkOMOPconnection <- function() {
     out <- FALSE
   }
 
+  on.exit(dbDisconnect(con))
+
   return(out)
 
 }
 
 
 # check that relevant tables exist in OMOP database
-checkOMOPtables <- function(username,password,host,dbname) {
+checkOMOPtables <- function() {
 
   necessaryTables = c("concept","concept_ancestor","concept_relationship","condition_occurrence","death","device_exposure","drug_exposure","measurement","observation","person","procedure_occurrence","visit_occurrence")
 
-  foundTables = "SHOW TABLES;"
-  foundTablesData <- sqlQuery(foundTables)
-  foundTablesData <- data.table(foundTablesData)
-  colnames(foundTablesData) <- "tables"
+  drv <- dbDriver(Sys.getenv("driver"))
+  con <- dbConnect(drv, user=Sys.getenv("username"), password=Sys.getenv("password"), dbname=Sys.getenv("dbname"), host=Sys.getenv("host"), port = as.integer(Sys.getenv("port")))
+  foundTablesData <- dbListTables(con)
+  on.exit(dbDisconnect(con))
 
   missingTables <- FALSE
 
   for (tbls in necessaryTables) {
-    if (!tbls %in% foundTablesData$tables) { # check if table exists
+    if (!tbls %in% foundTablesData) { # check if table exists
       missingTables <- TRUE
       message(paste0("missing required table: " , tbls ))
     } else { # check if any data in found table
@@ -103,13 +104,14 @@ checkOMOPtables <- function(username,password,host,dbname) {
 #############################
 
 
-# onload functions
+# .onLoad checks
 
 .onLoad <- function(...) {
-
-  message("Welcome to ROMOP: please refer to [https://LINK] for detailed instructions on how to use package with examples.\n")
-  message(paste0("Current OutDirectory is set to",getwd(), "/out/. Please use changeOutDirectory function to set.\n" ))
-  message("Now checking for required crednetials and server connection (note this package will not function without them). Please wait...\n")
+  packageStartupMessage(
+    paste0("Welcome to ROMOP: please refer to [https://LINK] for detailed instructions on how to use package with examples.\n
+Current OutDirectory is set to",getwd(), "/out/. Please use changeOutDirectory function to set.\n
+Now checking for required crednetials and server connection (note this package will not function without them). Please wait...\n")
+   )
 
   ## Verify crednetials exist
   credentialsExist <- checkCredentialsExist()
@@ -117,16 +119,16 @@ checkOMOPtables <- function(username,password,host,dbname) {
   if (credentialsExist == TRUE) { # require credentials
 
     ## Verify connection
-    successfulConnection <- checkOMOPconnection(username,password,host,dbname)
+    successfulConnection <- checkOMOPconnection()
 
     if (successfulConnection == TRUE) { # require successful connection
 
       # check if relevant tables exist
-      correctTables <- checkOMOPtables(username,password,host,dbname)
+      correctTables <- checkOMOPtables()
 
       if (correctTables == TRUE) { # require correct tables
 
-        message("Success! Please create 'dataOntology' using the makeDataOntology function.")
+        message("Success! Please create 'dataOntology' using the makeDataOntology function.\n e.g., dataOntology =  makeDataOntology(declare=TRUE,store_ontology = TRUE)")
 
       } else { # end if correct tables
         message("Missing required tables; package will not funciton correctly.")
@@ -136,6 +138,7 @@ checkOMOPtables <- function(username,password,host,dbname) {
       message("Unable to connect; package will not funciton correctly.")
     }
 
-  } #endif credentials
-
+  } else { #endif credentials
+    message("Please refer to the ReadMe to set and format server credentials in the .Renviron file.")
+  }
 }
