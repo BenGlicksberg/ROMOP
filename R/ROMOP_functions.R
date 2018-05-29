@@ -369,7 +369,7 @@ identifyPatientsAND <- function(criteriaMapped, synonymDataFiltered, mappingData
 ########## ONTOLOGY #########
 #############################
 
-makeDataOntology <- function(declare=TRUE, store_ontology=FALSE) {
+makeDataOntology <- function(declare=FALSE, store_ontology=FALSE) {
   if (declare==TRUE) {message("Retrieving concept data...")}
   create <- TRUE
   found <- FALSE
@@ -849,7 +849,7 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
 
 ### get demographics data ###
 
-getDemographics <-function(patient_list=NULL, declare=TRUE) { # patient list will restrict search
+getDemographics <-function(patient_list=NULL, declare=FALSE) { # patient list will restrict search
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
@@ -909,7 +909,7 @@ getDemographics <-function(patient_list=NULL, declare=TRUE) { # patient list wil
 }
 
 
-getEncounters <- function(patient_list, declare=TRUE) {
+getEncounters <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
@@ -956,17 +956,17 @@ getEncounters <- function(patient_list, declare=TRUE) {
 ### functions for retrieving clinical data ###
 ### these functions require patient_list otherwise it would return too much data
 
-getClinicalData<- function(patient_list, declare=TRUE) {
+getClinicalData<- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
   ### retrieves data from each data function below
-  ptObsData <- getObservations(patient_list,declare=TRUE)
-  ptCondData <- getConditions(patient_list,declare=TRUE)
-  ptProcData <- getProcedures(patient_list,declare=TRUE)
-  ptsMedsData <- getMedications(patient_list,declare=TRUE)
-  ptMeasData <- getMeasurements(patient_list,declare=TRUE)
-  ptDeviceData <- getDevices(patient_list,declare=TRUE)
+  ptObsData <- getObservations(patient_list,declare=declare)
+  ptCondData <- getConditions(patient_list,declare=declare)
+  ptProcData <- getProcedures(patient_list,declare=declare)
+  ptsMedsData <- getMedications(patient_list,declare=declare)
+  ptMeasData <- getMeasurements(patient_list,declare=declare)
+  ptDeviceData <- getDevices(patient_list,declare=declare)
 
   ptClinicalData <- list(ptObsData,ptCondData,ptProcData,ptsMedsData,ptMeasData,ptDeviceData)
   names(ptClinicalData) <- c("Observation", "Condition", "Procedures", "Medications","Measurements","Devices")
@@ -982,7 +982,7 @@ getClinicalData<- function(patient_list, declare=TRUE) {
 
 #################################  modality specific functions
 
-getObservations <- function(patient_list, declare=TRUE) {
+getObservations <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
@@ -1039,7 +1039,7 @@ getObservations <- function(patient_list, declare=TRUE) {
 }
 
 
-getConditions <- function(patient_list, declare=TRUE) {
+getConditions <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
@@ -1096,7 +1096,7 @@ getConditions <- function(patient_list, declare=TRUE) {
 
 }
 
-getProcedures <- function(patient_list, declare=TRUE){
+getProcedures <- function(patient_list, declare=FALSE){
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
@@ -1145,7 +1145,7 @@ getProcedures <- function(patient_list, declare=TRUE){
   }
 }
 
-getMedications <- function(patient_list, declare=TRUE) {
+getMedications <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
@@ -1199,7 +1199,7 @@ getMedications <- function(patient_list, declare=TRUE) {
   }
 }
 
-getMeasurements <- function(patient_list, declare=TRUE) {
+getMeasurements <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
@@ -1257,7 +1257,7 @@ getMeasurements <- function(patient_list, declare=TRUE) {
 
 }
 
-getDevices <- function(patient_list, declare=TRUE) {
+getDevices <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
