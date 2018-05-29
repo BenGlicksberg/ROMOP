@@ -1,5 +1,4 @@
 library(data.table)
-library(RMySQL)
 library(DBI)
 library(odbc)
 

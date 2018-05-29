@@ -101,17 +101,17 @@ summarizeDemographics <- function(ptDemo) {
 showDataTypes <- function() {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
-  
+
   dataTypes = dataOntology[domain_id %in% c("Condition","Observation","Measurement","Device","Procedure","Drug"),c("domain_id", "vocabulary_id")]
   dataTypes = dataTypes[!duplicated(dataTypes)]
   dataTypes = dataTypes[order(domain_id),]
 
   return(dataTypes)
-  
-  else { #endif dataOntology exists
+
+  } else { #endif dataOntology exists
     message("Error: dataOntology does not exist. Please first run makeDataOntology.")
-  } 
-  
+  }
+
 }
 
 
@@ -1079,7 +1079,7 @@ getConditions <- function(patient_list, declare=TRUE) {
     # format metadatadata
     ptCondData <- merge(ptCondData,dataOntology[,c("concept_id","concept_name")],by.x="condition_type_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptCondData)[names(ptCondData) == 'concept_name'] <- 'condition_type' # rename column
-    ptCondData <- ptCondData-"condition_type_concept_id"]
+    ptCondData <- ptCondData[,-"condition_type_concept_id"]
     ptCondData <- merge(ptCondData,dataOntology[,c("concept_id","concept_name")],by.x="condition_status_concept_id",by.y="concept_id", all.x=TRUE)
     names(ptCondData)[names(ptCondData) == 'concept_name'] <- 'condition_status_type' # rename column
     ptCondData <- ptCondData[,-"condition_status_concept_id"]
