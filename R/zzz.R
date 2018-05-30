@@ -1,6 +1,6 @@
-library(data.table)
 library(DBI)
 library(odbc)
+library(data.table)
 
 ### securely retrieve credentials stored in environment variables
 # ~/.Renviron

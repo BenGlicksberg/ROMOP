@@ -1,1 +1,3 @@
+import(data.table)
+import(dplyr)
 exportPattern("^[[:alpha:]]+")

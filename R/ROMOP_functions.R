@@ -4,11 +4,10 @@
 # 2018
 #############################
 
-library(data.table)
 library(dplyr)
 library(DBI)
 library(odbc)
-
+library(data.table)
 
 
 #############################
@@ -273,7 +272,7 @@ identifyPatientsOR <- function(pts_condition, pts_observation, pts_measurement, 
 }
 
 # function = AND (intersect)
-# this is somewhat complicated as we have to backmap the descendant terms to the original concepts
+# To identify overlapping patients, we have to backmap the descendant terms to the original concepts
 
 identifyPatientsAND <- function(criteriaMapped, synonymDataFiltered, mappingDataInfo, pts_condition, pts_observation, pts_measurement, pts_device, pts_drug, pts_procedure) {
 
@@ -364,6 +363,57 @@ identifyPatientsAND <- function(criteriaMapped, synonymDataFiltered, mappingData
 
 }
 
+# add counts to search query concepts by unique patients
+summarizeFoundConcepts <- function(pts_condition, pts_observation, pts_measurement, pts_device, pts_drug, pts_procedure){
+
+  conceptCount <- data.table(matrix(nrow=0,ncol=2))
+  colnames(conceptCount) <- c("concept_id","pt_count")
+
+  summarizeConcepts <- function(tblname, colname) {
+    tbl_concepts <- tblname %>%
+      group_by_(colname) %>%
+      summarise(COUNT = n())
+    tbl_concepts <- data.table(tbl_concepts)
+    colnames(tbl_concepts) <-  c("concept_id","pt_count")
+    return(tbl_concepts)
+  }
+
+
+  if (!is.null(pts_condition)) {
+    condition_concepts_count <- summarizeConcepts(pts_condition,"condition_concept_id")
+    conceptCount <- rbind(conceptCount, condition_concepts_count)
+  }
+
+  if (!is.null(pts_observation)) {
+    observation_concepts_count <- summarizeConcepts(pts_observation,"observation_concept_id")
+    conceptCount <- rbind(conceptCount, observation_concepts_count)
+  }
+
+  if (!is.null(pts_measurement)) {
+    measurement_concepts_count <- summarizeConcepts(pts_measurement,"measurement_concept_id")
+    conceptCount <- rbind(conceptCount, measurement_concepts_count)
+  }
+
+  if (!is.null(pts_device)) {
+    device_concepts_count <- summarizeConcepts(pts_device,"device_concept_id")
+    conceptCount <- rbind(conceptCount, device_concepts_count)
+  }
+
+  if (!is.null(pts_drug)) {
+    drug_concepts_count <- summarizeConcepts(pts_drug,"drug_concept_id")
+    conceptCount <- rbind(conceptCount, drug_concepts_count)
+  }
+
+  if (!is.null(pts_procedure)) {
+    procedure_concepts_count <- summarizeConcepts(pts_procedure,"procedure_concept_id")
+    conceptCount <- rbind(conceptCount, procedure_concepts_count)
+  }
+
+  return(conceptCount)
+
+}
+
+
 
 #############################
 ########## ONTOLOGY #########
@@ -389,11 +439,9 @@ makeDataOntology <- function(declare=FALSE, store_ontology=FALSE) {
   }
 
   if (create == TRUE) {
-  conceptQuery <- "SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, concept_code, standard_concept FROM concept WHERE invalid_reason = '';"
+  conceptQuery <- "SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, concept_code FROM concept WHERE invalid_reason = '';"
   dataOntology <- sqlQuery(conceptQuery)
   dataOntology <- data.table(dataOntology)
-  dataOntology <- dataOntology[,-"standard_concept"]
-
   }
 
   if (declare==TRUE) {
@@ -412,6 +460,25 @@ makeDataOntology <- function(declare=FALSE, store_ontology=FALSE) {
   return(dataOntology)
 
 }
+
+# function to simply extract descendants for concepts of interest
+exploreConcepts <- function(vocabulary, codes) {
+
+  criteriaMapped <- unpackAndMap(vocabulary,codes)
+
+  if (nrow(criteriaMapped)>0) {
+    codesFormatted <- paste0(criteriaMapped$concept_id,collapse=",")
+    synonymDataFiltered <- identifySynonyms(codesFormatted)
+    synonymCodes <- paste(c(codesFormatted, unique(synonymDataFiltered$concept_id_2)),collapse=",")
+    mappingDataInfo <- identifyMappings(synonymCodes)
+
+    return(mappingDataInfo)
+
+  } else {
+    message("Error: none of the inclusion criteria were able to map to the ontology. Please check terms and try again.")
+  }
+}
+
 
 
 #############################
@@ -584,11 +651,7 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
       message("The following INCLUSION mapped concepts are being queried: \n")
       print(includeMappingDataInfo)
     }
-
-    if (save == TRUE) {
-      fout = paste0(outdir,"/inclusion_criteria_mapped_concepts.txt")
-      write.table(includeMappingDataInfo, file = fout, sep='\t', row.names=F, quote=F)
-    }
+    # save mapped concepts after patient count per concept added
 
     # get tables to search for mapped concepts
     includeSearchTable <- identifyTablesMapped(includeMappingDataInfo)
@@ -652,6 +715,16 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
     pts_procedure_include <- NULL
   }
 
+  # save mapped concepts with patient counts
+  if (save == TRUE) {
+    fout = paste0(outdir,"/inclusion_criteria_mapped_concepts.txt")
+    includeDataInfowPatients <- summarizeFoundConcepts(pts_condition_include, pts_observation_include, pts_measurement_include, pts_device_include, pts_drug_include, pts_procedure_include)
+    # merge pt counts with all concepts
+    includeMappingCombined <- merge(includeMappingDataInfo, includeDataInfowPatients, by.x = "descendant_concept_id", by.y = "concept_id", all.x = TRUE)
+    write.table(includeMappingCombined, file = fout, sep='\t', row.names=F, quote=F)
+  }
+
+
   # 3- EXCLUSION
   # vocabulary_out = "ICD9CM"
   # codes_out = "250.00"
@@ -696,11 +769,7 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
          print(excludeMappingDataInfo)
        }
 
-       if (save == TRUE) {
-         fout <- paste0(outdir,"/exclusion_criteria_mapped_concepts.txt")
-         write.table(excludeMappingDataInfo, file = fout, sep='\t', row.names=F, quote=F)
-       }
-
+       # save mapped concepts once patient counts are added
 
        # get tables to search for mapped concepts
        excludeSearchTable <- identifyTablesMapped(excludeMappingDataInfo)
@@ -762,6 +831,15 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
        pts_procedure_exclude <- searchProcedure(useSource,procedure_codes)
      } else {
        pts_procedure_exclude <- NULL
+     }
+
+     # save mapped concepts with patient counts
+     if (save == TRUE) {
+       fout <- paste0(outdir,"/exclusion_criteria_mapped_concepts.txt")
+       excludeDataInfowPatients <- summarizeFoundConcepts(pts_condition_exclude, pts_observation_exclude, pts_measurement_exclude, pts_device_exclude, pts_drug_exclude, pts_procedure_exclude)
+       # merge pt counts with all concepts
+       excludeMappingCombined <- merge(excludeMappingDataInfo, excludeDataInfowPatients, by.x = "descendant_concept_id", by.y = "concept_id", all.x = TRUE)
+       write.table(excludeMappingCombined, file = fout, sep='\t', row.names=F, quote=F)
      }
 
     } else { #endif exclusion criteria match
