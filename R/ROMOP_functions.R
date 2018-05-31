@@ -58,7 +58,9 @@ changeOutDirectory <- function(outdir, create = FALSE) {
     outDirectory = outdir
   } else {
     if (create == TRUE) {
-      message(paste0(outdir, " does not exist. Created and set to OutDirectoy. "))
+      dir.create(outdir)
+      outDirectory = outdir
+      message(paste0(outdir, " does not exist. Created and set to OutDirectory. "))
     } else {
       message(paste0(outdir, " does not exist. Please set 'create = TRUE' if you wish to create it or choose an already existing directory. OutDirectory not set. "))
     }
