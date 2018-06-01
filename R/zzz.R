@@ -108,7 +108,7 @@ checkOMOPtables <- function() {
 .onLoad <- function(...) {
   packageStartupMessage(
     paste0("Welcome to ROMOP: please refer to [https://LINK] for detailed instructions on how to use package with examples.\n
-Current OutDirectory is set to",getwd(), "/out/. Please use changeOutDirectory function to set.\n
+Current OutDirectory is set to ",getwd(), "/out/. Please use changeOutDirectory function to set.\n e.g., changeOutDirectory('path/to/outdir', create = TRUE) \n
 Now checking for required crednetials and server connection (note this package will not function without them). Please wait...\n")
    )
 

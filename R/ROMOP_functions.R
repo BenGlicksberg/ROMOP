@@ -20,8 +20,8 @@ library(data.table)
 #define standard_concepts
 standard_concepts= data.table("domain_type"= c("Measurement","Condition","Drug","Observation","Device","Procedure"),"concepts"= c("LOINC,SNOMED,CPT4","SNOMED","RxNorm,CPT4,NDC","SNOMED,CPT4,LOINC,HCPCS","SNOMED,HCPCS","SNOMED,CPT4,HCPCS"))
 
-### initialize outDirectory
-outDirectory = "out/"
+### initialize outDirectory as current working directory
+outDirectory = getwd()
 
 
 
@@ -186,7 +186,7 @@ identifySynonyms <- function(codesFormatted) {
   synonymData <- synonymData[invalid_reason == ""]
   synonymData <- synonymData[,-"invalid_reason"]
 
-  # check for "Maps to" or "%- RxNorm%" or "%- SNOMED%" | standard concepts *** decision
+  # check for "Maps to" or "%- RxNorm%" or "%- SNOMED%" | standard concepts
   synonymDataFiltered <- synonymData[(relationship_id == "Maps to") | (grepl("- RxNorm",relationship_id)) | (grepl("- SNOMED",relationship_id)) ]
 
   return(synonymDataFiltered)
