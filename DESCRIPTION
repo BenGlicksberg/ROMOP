@@ -12,3 +12,4 @@ LazyData: true
 Imports: dplyr, data.table, DBI, odbc, RMySQL
 Suggests: RPostgreSQL
 Depends: R (>= 3.4)
+RoxygenNote: 6.0.1
