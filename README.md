@@ -78,8 +78,7 @@ page](https://github.com/BenGlicksberg/ROMOP) and installed by the
 following steps:
 
 1.  Unzip ROMOP-master.zip
-2.  R CMD build ROMOP-master
-3.  R CMD INSTALL ROMOP\_0.1.0.tar.gz
+2.  R CMD INSTALL ROMOP-master
 
 Please see the [Setup](#setup) section to properly configure the package
 to work.
@@ -351,7 +350,11 @@ exclusion criteria if entered).
     and “K51” for ICD10CM, and “235599003” for SNOMED.  
   - function\_ corresponds to how criteria should be treated. *and*
     necessitates patients meet all criteria while *or* allows for
-    patients to meet any of the criteria.  
+    patients to meet any of the criteria.
+  - Please note that if no standard common concepts are found per search
+    domain, a warning message will appear and the search will not be
+    able to be performed (see [Helpful Hints](#helpful-hints) for more
+    details.)
   - if save == TRUE, the following information is saved in a directory
     per query:
       - query: all arguments for the search.
@@ -774,6 +777,29 @@ To Do
     warehouses do not “back-map” codes. Using the *mapped* argument will
     bypass this issue as the standard concept will be used which should
     capture both options.
+  - Standard vocabularies: while the OMOP common data model utilizes
+    many ontologies, **SNOMED** and **RxNorm** are used primarily for
+    common concepts in the clincal data tables. As such, while any
+    vocabulary can be used for [findPatients](#findpatients), the
+    *mapped* function will only be able to find data contained within
+    the following common concepts per domain:
+
+<!-- end list -->
+
+    ##   domain_type                concepts
+    ## 1 Measurement       LOINC,SNOMED,CPT4
+    ## 2   Condition                  SNOMED
+    ## 3        Drug         RxNorm,CPT4,NDC
+    ## 4 Observation SNOMED,CPT4,LOINC,HCPCS
+    ## 5      Device            SNOMED,HCPCS
+    ## 6   Procedure       SNOMED,CPT4,HCPCS
+
+Consequently, if inclusion/exclusion criteria can be be mapped to the
+data ontology, but no synonym/descendants are contained within the above
+common concepts, no search will be performed (as no patients would be
+returned). This most directly affects searching for *Drug* concepts, in
+which we reccommend not using standard common concepts (e.g., RxNorm,
+ATC) for search criteria.
 
   - To ensure complete capture of data concepts of interest, we
     recommend identifying multiple vocabulary/codes to use using the
@@ -783,8 +809,6 @@ To Do
     N03AE) as well as the relevant Substance (SNOMED) codes (e.g.,
     16047007). The [exploreConcepts](#exploreconcepts) function can be
     used to identify and prioiritize which codes are optimal to use.
-
-  - \[rec for drug to use rxnorm or atc\]
 
 ## Team
 
