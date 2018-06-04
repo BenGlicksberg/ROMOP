@@ -4,6 +4,11 @@
 ######### GENERAL ##########
 #############################
 
+#define standard_concepts
+standard_concepts <- function(){
+  data.table("domain_type"= c("Measurement","Condition","Drug","Observation","Device","Procedure"),"concepts"= c("LOINC,SNOMED,CPT4","SNOMED","RxNorm,CPT4,NDC","SNOMED,CPT4,LOINC,HCPCS","SNOMED,HCPCS","SNOMED,CPT4,HCPCS"))
+}
+
 ### general query function ###
 sqlQuery <- function(query) {
 
@@ -71,6 +76,7 @@ checkParameters <- function(strategy_in, function_in, strategy_out, function_out
 
 
 ## unpack vocabularies and codes for search function
+#' @import data.table
 unpackAndMap <- function(vocabularies_input, codes_input) {
   vocabularies_split <- trimws(strsplit(vocabularies_input,",")[[1]])
   codes_split <- trimws(strsplit(codes_input,",")[[1]])
@@ -83,7 +89,7 @@ unpackAndMap <- function(vocabularies_input, codes_input) {
     by = vocabularies]
 
   # map inclusion criteria to dataOntology
-  dataCriteriaMapped <- data.table::merge(dataCriteria, dataOntology, by.x= "codes", by.y = "concept_code")
+  dataCriteriaMapped <- merge(dataCriteria, dataOntology, by.x= "codes", by.y = "concept_code")
   dataCriteriaMapped <- dataCriteriaMapped[vocabularies==vocabulary_id]
 
   return(dataCriteriaMapped)
@@ -106,13 +112,14 @@ identifySynonyms <- function(codesFormatted) {
 }
 
 # for 'Mapped' straegy; map input concept codes (from common ontology) to common ontology descendants
+#' @import data.table
 identifyMappings <- function(synonymCodes) {
 
   mappingQuery <- paste0('SELECT ancestor_concept_id, descendant_concept_id FROM concept_ancestor A WHERE A.ancestor_concept_id IN (', synonymCodes,' );')
   mappingData <- sqlQuery(mappingQuery)
   mappingData <- data.table::data.table(mappingData)
 
-  mappingDataInfo <- data.table::merge(mappingData,dataOntology, by.x = "descendant_concept_id", by.y = "concept_id")
+  mappingDataInfo <- merge(mappingData,dataOntology, by.x = "descendant_concept_id", by.y = "concept_id")
 
   return(mappingDataInfo)
 
@@ -143,7 +150,7 @@ identifyTablesMapped <- function(mappingDataInfo) {
 
     mappingDataInfoFiltered <- mappingDataInfo[domain_id==d]
     mappingDataInfoFiltered <-  mappingDataInfoFiltered[(grep(gsub(",","|",standard_concepts()[domain_type==d,concepts]),vocabulary_id))] # map to common concepts specifically used to the domain
-    mappingCodes <- mappingDataInfoFiltered$descendant_concept_id
+    mappingCodes <- mappingDataInfoFiltered$concept_id
     searchTable[[d]] <- mappingCodes
   }
 
@@ -187,19 +194,19 @@ identifyPatientsOR <- function(pts_condition, pts_observation, pts_measurement, 
 
 # function = AND (intersect)
 # To identify overlapping patients, we have to backmap the descendant terms to the original concepts
-
+#' @import data.table
 identifyPatientsAND <- function(criteriaMapped, synonymDataFiltered, mappingDataInfo, pts_condition, pts_observation, pts_measurement, pts_device, pts_drug, pts_procedure) {
 
   names(mappingDataInfo)[names(mappingDataInfo) == 'vocabulary_id'] <- 'mapped_vocabulary_id'
   names(mappingDataInfo)[names(mappingDataInfo) == 'concept_name'] <- 'mapped_concept_name'
 
-  synonymMapped <- data.table::merge(mappingDataInfo[,c("descendant_concept_id","ancestor_concept_id","mapped_vocabulary_id","mapped_concept_name")], synonymDataFiltered[,c("concept_id_1","concept_id_2")], by.x = "ancestor_concept_id", by.y = "concept_id_2", allow.cartesian=TRUE)
+  synonymMapped <- merge(mappingDataInfo[,c("descendant_concept_id","ancestor_concept_id","mapped_vocabulary_id","mapped_concept_name")], synonymDataFiltered[,c("concept_id_1","concept_id_2")], by.x = "ancestor_concept_id", by.y = "concept_id_2", allow.cartesian=TRUE)
   synonymMapped <- synonymMapped[!duplicated(synonymMapped)]
 
-  combinedMapped <- data.table::merge(synonymMapped, criteriaMapped, by.x = "concept_id_1", by.y = "concept_id", allow.cartesian=TRUE)
+  combinedMapped <- merge(synonymMapped, criteriaMapped, by.x = "concept_id_1", by.y = "concept_id", allow.cartesian=TRUE)
   combinedMapped <- combinedMapped[!duplicated(combinedMapped)]
 
-  combinedDirect <- data.table::merge(mappingDataInfo, criteriaMapped, by.x = "ancestor_concept_id", by.y = "concept_id", allow.cartesian=TRUE)
+  combinedDirect <- merge(mappingDataInfo, criteriaMapped, by.x = "ancestor_concept_id", by.y = "concept_id", allow.cartesian=TRUE)
   combinedDirect <- combinedDirect[!duplicated(combinedDirect)]
 
 

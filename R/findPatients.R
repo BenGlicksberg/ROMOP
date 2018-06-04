@@ -46,17 +46,17 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
       if (save==TRUE) {
 
         if (is.null(out_name)) {
-          outdir <- paste0(outDirectory,gsub(" ", "_",Sys.time()))
+          outdir <- paste0(getOption("outDirectory"),gsub(" ", "_",Sys.time()))
           dir.create(outdir)
         } else {
           # check to see if directory already exists
-          outdir <- paste0(outDirectory,out_name)
+          outdir <- paste0(getOption("outDirectory"),out_name)
           if (!dir.exists(outdir)) {
-            dir.create(paste0(outDirectory,out_name))
+            dir.create(paste0(getOption("outDirectory"),out_name))
           } else {
-            outdir <- paste0(outDirectory,gsub(" ", "_",Sys.time()))
+            outdir <- paste0(getOption("outDirectory"),gsub(" ", "_",Sys.time()))
             dir.create(outdir)
-            message(paste0(outDirectory, out_name, " directory already exists. Saving results to: ", outdir))
+            message(paste0(getOption("outDirectory"), out_name, " directory already exists. Saving results to: ", outdir))
           }
         }
 
@@ -126,24 +126,39 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
 
           # get common ontology synonyms
           includeSynonymDataFiltered <- identifySynonyms(includeCodesFormatted)
-          includeSynonymCodes <- paste(c(includeCodesFormatted, unique(includeSynonymDataFiltered$concept_id_2)),collapse=",") ## adds original codes into ancestor query (b/c of scenarios with ATC))
+          includeSynonymData <- merge(includeSynonymDataFiltered[,"concept_id_2"], dataOntology[,c("concept_id","domain_id","vocabulary_id")], by.x="concept_id_2",by.y = "concept_id")
+          colnames(includeSynonymData) <- c("concept_id","domain_id","vocabulary_id")
+          includeSynonymCodes <- paste(union(inclusionCriteriaMapped$concept_id, includeSynonymDataFiltered$concept_id_2),collapse = ",") ## adds original codes into ancestor query (b/c of scenarios with ATC))
 
           # get descendents
           includeMappingDataInfo <- identifyMappings(includeSynonymCodes)
+          includeMappingData <- includeMappingDataInfo[,c("descendant_concept_id","domain_id","vocabulary_id")]
+          colnames(includeMappingData) <- c("concept_id","domain_id","vocabulary_id")
+
+          includeCombined <- rbind(inclusionCriteriaMapped[,c("concept_id","domain_id","vocabulary_id")],includeSynonymData)
+          includeCombined <- rbind(includeCombined, includeMappingData)
+          includeCombined <- includeCombined[!duplicated(includeCombined),]
 
           if (declare == TRUE) {
-            message("The following INCLUSION mapped concepts are being queried: \n")
+            message("The following INCLUSION mapped concepts are being queried (along with mapped input and synonyms): \n")
             print(includeMappingDataInfo)
           }
           # save mapped concepts after patient count per concept added
 
           # get tables to search for mapped concepts
-          includeSearchTable <- identifyTablesMapped(includeMappingDataInfo)
+          includeSearchTable <- identifyTablesMapped(includeCombined)
 
 
         } #endif strategy_in == mapped
 
         # 2- SEARCH INCLUSION
+
+        # if standard concepts are found for criteria after synonym and descendant search
+        if (all(array(sapply(includeSearchTable, length)))==0) {
+          if (declare == TRUE){
+            message("Warning: no concepts could be mapped to INCLUSION criteria standard concepts for the domain of interest and, as such, no patients will be identified. Please refer to README for more details.")
+          }
+        }
 
         # if any condition table codes
         if (length(includeSearchTable$Condition)>0) {
@@ -243,24 +258,42 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
 
               # get common ontology synonyms
               excludeSynonymDataFiltered <- identifySynonyms(excludeCodesFormatted)
-              excludeSynonymCodes <- paste(c(excludeCodesFormatted, unique(excludeSynonymDataFiltered$concept_id_2)),collapse=",") ## adds original codes into ancestor query (b/c of scenarios with ATC))
+              excludeSynonymData <- merge(excludeSynonymDataFiltered[,"concept_id_2"], dataOntology[,c("concept_id","domain_id","vocabulary_id")], by.x="concept_id_2",by.y = "concept_id")
+              colnames(excludeSynonymData) <- c("concept_id","domain_id","vocabulary_id")
+              excludeSynonymCodes <- paste(union(exclusionCriteriaMapped$concept_id, excludeSynonymDataFiltered$concept_id_2),collapse = ",") ## adds original codes into ancestor query (b/c of scenarios with ATC))
+
 
               # get descendents
               excludeMappingDataInfo <- identifyMappings(excludeSynonymCodes)
+              excludeMappingData <- excludeMappingDataInfo[,c("descendant_concept_id","domain_id","vocabulary_id")]
+              colnames(excludeMappingData) <- c("concept_id","domain_id","vocabulary_id")
+
+
+              excludeCombined <- rbind(exclusionCriteriaMapped[,c("concept_id","domain_id","vocabulary_id")],excludeSynonymData)
+              excludeCombined <- rbind(excludeCombined, excludeMappingData)
+              excludeCombined <- excludeCombined[!duplicated(excludeCombined),]
 
               if (declare == TRUE) {
-                message("The following EXCLUSION mapped concepts are being queried: \n")
+                message("The following EXCLUSION mapped concepts are being queried (along with mapped input and synonyms): \n")
                 print(excludeMappingDataInfo)
               }
 
               # save mapped concepts once patient counts are added
 
               # get tables to search for mapped concepts
-              excludeSearchTable <- identifyTablesMapped(excludeMappingDataInfo)
+              excludeSearchTable <- identifyTablesMapped(excludeCombined)
 
             }
 
             # 4- SEARCH EXCLUSION
+
+            # if standard concepts are found for criteria after synonym and descendant search
+            if (all(array(sapply(excludeSearchTable, length)))==0) {
+              if (declare == TRUE){
+                message("Warning: no concepts could be mapped to EXCLUSION criteria standard concepts for the domain of interest and, as such, no patients will be identified. Please refer to README for more details.")
+              }
+            }
+
 
             # if any condition table codes
             if (length(excludeSearchTable$Condition)>0) {

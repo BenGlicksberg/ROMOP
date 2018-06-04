@@ -19,9 +19,9 @@ makeDataOntology <- function(declare=FALSE, store_ontology=FALSE) {
   found <- FALSE
 
   if (store_ontology==TRUE) {
-    if (file.exists(paste0(outDirectory,"dataOntology.rds")) ) {
+    if (file.exists(paste0(getOption("outDirectory"),"dataOntology.rds")) ) {
       message("Data Ontology found; loading... ")
-      dataOntology = readRDS(paste0(outDirectory,"dataOntology.rds"))
+      dataOntology = readRDS(paste0(getOption("outDirectory"),"dataOntology.rds"))
       message("Data Ontology loaded from memory successfully. ")
       create <- FALSE
       found <- TRUE
@@ -46,8 +46,8 @@ makeDataOntology <- function(declare=FALSE, store_ontology=FALSE) {
   }
 
   if (store_ontology == TRUE & found == FALSE) { # save data ontology
-    message(paste0("Storing Data Ontology: ", outDirectory,"dataOntology.rds"))
-    saveRDS(dataOntology, paste0(outDirectory,"dataOntology.rds"))
+    message(paste0("Storing Data Ontology: ", getOption("outDirectory"),"dataOntology.rds"))
+    saveRDS(dataOntology, paste0(getOption("outDirectory"),"dataOntology.rds"))
 
   }
 

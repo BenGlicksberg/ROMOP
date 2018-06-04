@@ -112,6 +112,9 @@ Current OutDirectory is set to ",getwd(), "/out/. Please use changeOutDirectory 
 Now checking for required crednetials and server connection (note this package will not function without them). Please wait...\n")
    )
 
+  ### initialize outDirectory as current working directory
+  options("outDirectory" = paste0(getwd(),"/"))
+
   ## Verify crednetials exist
   credentialsExist <- checkCredentialsExist()
 
