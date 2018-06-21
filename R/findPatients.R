@@ -216,11 +216,13 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
 
         # save mapped concepts with patient counts
         if (save == TRUE) {
+          if (!(all(array(sapply(includeSearchTable, length)))==0)) {
           fout = paste0(outdir,"/inclusion_criteria_mapped_concepts.txt")
           includeDataInfowPatients <- summarizeFoundConcepts(pts_condition_include, pts_observation_include, pts_measurement_include, pts_device_include, pts_drug_include, pts_procedure_include)
           # merge pt counts with all concepts
           includeMappingCombined <- merge(includeMappingDataInfo, includeDataInfowPatients, by.x = "descendant_concept_id", by.y = "concept_id", all.x = TRUE)
           write.table(includeMappingCombined, file = fout, sep='\t', row.names=F, quote=F)
+          }
         }
 
 
@@ -352,11 +354,13 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
 
             # save mapped concepts with patient counts
             if (save == TRUE) {
-              fout <- paste0(outdir,"/exclusion_criteria_mapped_concepts.txt")
-              excludeDataInfowPatients <- summarizeFoundConcepts(pts_condition_exclude, pts_observation_exclude, pts_measurement_exclude, pts_device_exclude, pts_drug_exclude, pts_procedure_exclude)
-              # merge pt counts with all concepts
-              excludeMappingCombined <- merge(excludeMappingDataInfo, excludeDataInfowPatients, by.x = "descendant_concept_id", by.y = "concept_id", all.x = TRUE)
-              write.table(excludeMappingCombined, file = fout, sep='\t', row.names=F, quote=F)
+              if (!(all(array(sapply(excludeSearchTable, length)))==0)) {
+                fout <- paste0(outdir,"/exclusion_criteria_mapped_concepts.txt")
+                excludeDataInfowPatients <- summarizeFoundConcepts(pts_condition_exclude, pts_observation_exclude, pts_measurement_exclude, pts_device_exclude, pts_drug_exclude, pts_procedure_exclude)
+                # merge pt counts with all concepts
+                excludeMappingCombined <- merge(excludeMappingDataInfo, excludeDataInfowPatients, by.x = "descendant_concept_id", by.y = "concept_id", all.x = TRUE)
+                write.table(excludeMappingCombined, file = fout, sep='\t', row.names=F, quote=F)
+              }
             }
 
           } else { #endif exclusion criteria match
@@ -493,3 +497,5 @@ searchProcedure<- function(useSource,codes) {
   dataProcedure <- dataProcedure[!duplicated(dataProcedure)]
   return(dataProcedure)
 }
+
+
