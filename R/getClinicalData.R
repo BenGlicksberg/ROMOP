@@ -262,7 +262,7 @@ getMedications <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
-    queryStatement <- paste0('SELECT person_id, drug_concept_id, order_datetime, drug_exposure_start_datetime, drug_exposure_end_datetime, drug_type_concept_id, stop_reason, refills, quantity, days_supply, sig, route_concept_id, dose_unit_source_value, visit_occurrence_id, drug_source_value, drug_source_concept_id, route_source_value FROM drug_exposure WHERE person_id IN (', patient_list,') ')
+    queryStatement <- paste0('SELECT person_id, drug_concept_id, drug_exposure_start_datetime, drug_exposure_end_datetime, drug_type_concept_id, stop_reason, refills, quantity, days_supply, sig, route_concept_id, dose_unit_source_value, visit_occurrence_id, drug_source_value, drug_source_concept_id, route_source_value FROM drug_exposure WHERE person_id IN (', patient_list,') ')
 
     if (declare==TRUE) {message("Loading Medications data...")}
 
