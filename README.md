@@ -1,7 +1,7 @@
 ROMOP Readme
 ================
 Benjamin S. Glicksberg
-5/30/2018
+6/22/2018
 
 ## ROMOP
 
@@ -26,9 +26,10 @@ queries within ROMOP heavily rely on these vocabularies.
 the concepts in these ontologies and identify ideal search terms of
 interest.
 
-\[Manuscript Information\]
+![Features of
+ROMOP](/Users/bglicksberg/Desktop/Ben%20Glicksberg/Butte%20Lab/Manuscripts/ROMOP/figure1a.png)
 
-\[SERVER & COMPUTATIONAL POWER INFO FOR TIME-RELATED OUTPUT\]
+\[Manuscript Information\]
 
 ## Requirements
 
@@ -38,6 +39,10 @@ ROMOP requires EHR data to be in OMOP format and on a server accessible
 to by the user. In it’s current form, ROMOP requires the database to be
 in either *MySQL* or *PostgreSQL* format, but subsequent releases will
 allow for other formats.
+
+Users without access to EHR data might consider using synthetic public
+data following the instructions provided by the OHDSI group
+[here](https://github.com/OHDSI/ETL-CMS).
 
 #### Programming Language
 
@@ -235,7 +240,7 @@ return demographic data for all available patients
 
 *Value*:  
   Returns a list of data.tables stratified by domain type (e.g.,
-ptClinicalData$Concept, ptClinicalData$Observation, etc…)
+ptClinicalData$Condition, ptClinicalData$Observation, etc…)
 
 *Details*:
 
@@ -484,7 +489,7 @@ standard concept(s) as well as decendent concept(s)
 
 *Arguments*:
 
-  vocabulary         *vocabulariy*  
+  vocabulary         *vocabulary*  
          comma-separated string of relevant vocabularies for inclusion
 criteria (see Details).
 
@@ -515,7 +520,8 @@ heirarchy) the query concept.
 
 Both simple and advanced [findPatients](#findpatients) queries will be
 outlined. See the [Output](#output) section for description of output if
-save == TRUE.
+save == TRUE. For the process timing provided, all queries were run on
+an Amazon Elastic Compute Cloud (EC2) instance.
 
 ### Simple
 
@@ -760,7 +766,55 @@ We will detail the respective output files that are derived from Simple
 
 ## Code Breakdown
 
-To Do
+![Workflow of ROMOP
+functionality](/Users/bglicksberg/Desktop/Ben%20Glicksberg/Butte%20Lab/Manuscripts/ROMOP/figure1b.png)
+
+ROMOP first requires the creation a data dictionary (using
+[makeDataOntology](#makedataontology) function) of the ontology (from
+*concept* table) that is referenced and utilized to map to all concepts
+for all functions. Using this ontology, all searches and extractions are
+optimized to only query tables in which the data could be found.
+
+### Data Retrieval
+
+The majority of data in clinical tables are stored as concepts. When
+data is extracted, ROMOP first maps the relevant concepts (e.g.,
+device\_type\_concept\_id) to the data dictionary and then returns the
+mapped concepts to the user.
+
+### Searching
+
+In the OMOP data structure, there is a distinction between how concepts
+are recorded and what can be directly searched for. For instance, if the
+user is interested in the medication idelalisib, it is not possible to
+directly identify records by searching for the general concept (e.g.,
+RxNorm code 1544460) as the data are recorded by the bottom-most (i.e.,
+most specific) concepts of the hierarchy (e.g., idelalisib 150 MG
+Delayed Release Oral Tablet). The hierarchical structure of these
+concepts in the OMOP CDM back-end, however, facilitates more powerful
+searches. In most extracted EHR systems, the user has to define all
+medications to search, for instance through a pre-populated list or by
+wildcard string matching (e.g., all drug names LIKE “%statin%”). This
+strategy is ultimately not ideal as it is not extensible to other
+systems (e.g., one system might prescribe a version or formulation of a
+drug that is in not in another) and requires extensive manual
+quality-control (e.g., removing “nystatin” drugs from the string
+matching results). For the [findPatients](#findpatients) function, if
+the “mapped” option is selected, searching for a broad code like ATC
+level 3 code A05A (bile therapies), or even a specific term code like
+RxNorm code 1544460 for idelalisib, will automatically identify and
+query for all bottom-level (e.g., idelalisib 150 MG Delayed Release Oral
+Tablet) codes contained underneath that seed concept. This works by
+ROMOP first mapping the initial search criteria to a standard concept
+(SNOMED or RxNorm) and finding all descendants underneath it. Another
+benefit to this “mapped” option is that terms are not reliant on how the
+data were originally entered. For instance, if a health system switches
+from ICD-9CM to ICD-10CM coding, there might be discrepancies in
+prevalence of codes over time. Mapping to a common concept, however,
+often alleviates this issue as codes from both vocabularies are
+typically linked to a common code in the standard vocabulary. Of course
+the user can search for the concepts they entered only using the
+“direct” option (i.e., search for ICD-9CM code 230.0 only).
 
 ## Helpful Hints
 
@@ -813,6 +867,31 @@ ATC) for search criteria.
 ## Team
 
 To Do
+
+## License
+
+MIT License
+
+Copyright (c) 2018 Benjamin S. Glicksberg
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+“Software”), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Contact
 
