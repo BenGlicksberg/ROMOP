@@ -15,6 +15,10 @@ getClinicalData<- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
+
     ### retrieves data from each data function below
     ptObsData <- getObservations(patient_list,declare=declare)
     ptCondData <- getConditions(patient_list,declare=declare)
@@ -54,6 +58,10 @@ getClinicalData<- function(patient_list, declare=FALSE) {
 getObservations <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
+
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
 
     ## observation
     # observation_concept_id is SNOMED
@@ -125,6 +133,10 @@ getObservations <- function(patient_list, declare=FALSE) {
 getConditions <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
+
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
 
     queryStatement <- paste0('SELECT person_id, condition_concept_id, condition_start_datetime, visit_occurrence_id, condition_type_concept_id, condition_source_value, condition_source_concept_id, condition_status_concept_id FROM condition_occurrence WHERE person_id IN (', patient_list,') ')
 
@@ -198,6 +210,10 @@ getProcedures <- function(patient_list, declare=FALSE){
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
+
     queryStatement <- paste0('SELECT person_id, procedure_concept_id, procedure_datetime, quantity, visit_occurrence_id, procedure_type_concept_id, procedure_source_value, procedure_source_concept_id  FROM procedure_occurrence WHERE person_id IN (', patient_list,') ')
 
     if (declare==TRUE) {message("Loading Procedures data...")}
@@ -261,6 +277,10 @@ getProcedures <- function(patient_list, declare=FALSE){
 getMedications <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
+
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
 
     queryStatement <- paste0('SELECT person_id, drug_concept_id, drug_exposure_start_datetime, drug_exposure_end_datetime, drug_type_concept_id, stop_reason, refills, quantity, days_supply, sig, route_concept_id, dose_unit_source_value, visit_occurrence_id, drug_source_value, drug_source_concept_id, route_source_value FROM drug_exposure WHERE person_id IN (', patient_list,') ')
 
@@ -329,6 +349,10 @@ getMedications <- function(patient_list, declare=FALSE) {
 getMeasurements <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
+
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
 
     queryStatement <- paste0('SELECT person_id, measurement_concept_id, measurement_datetime, measurement_type_concept_id, value_as_number, value_as_concept_id, unit_concept_id, visit_occurrence_id, measurement_source_value, measurement_source_concept_id FROM measurement WHERE person_id IN (', patient_list,') ');
 
@@ -401,6 +425,10 @@ getMeasurements <- function(patient_list, declare=FALSE) {
 getDevices <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
+
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
 
     queryStatement <- paste0('SELECT person_id, device_concept_id, device_exposure_start_datetime, device_exposure_end_datetime, device_type_concept_id, device_source_value, visit_occurrence_id, device_source_concept_id FROM device_exposure WHERE person_id IN (', patient_list,') ');
 

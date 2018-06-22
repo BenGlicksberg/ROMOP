@@ -15,6 +15,10 @@ getDemographics <-function(patient_list=NULL, declare=FALSE) { # patient list wi
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
+
     queryStatement <- "SELECT person_id, birth_datetime, year_of_birth, gender_concept_id, ethnicity_concept_id, race_concept_id FROM person" # year_of_birth added in case birth_datetime IS NULL
     deathqueryStatement <-"SELECT person_id, death_date FROM death"
 

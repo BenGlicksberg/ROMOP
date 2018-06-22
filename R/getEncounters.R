@@ -14,6 +14,10 @@ getEncounters <- function(patient_list, declare=FALSE) {
 
   if (exists("dataOntology")) { # ensure dataOntology exists
 
+    if (length(patient_list) > 1){
+      patient_list <- paste(patient_list, collapse = ",")
+    }
+
     queryStatement <- paste0('SELECT person_id, visit_occurrence_id, visit_concept_id, visit_start_datetime, visit_end_datetime, visit_source_concept_id, visit_source_value, admitting_source_concept_id, discharge_to_concept_id FROM visit_occurrence WHERE person_id IN (', patient_list,') ')
 
     if (declare==TRUE) {message("Loading encounters data...")}
