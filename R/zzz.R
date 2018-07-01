@@ -12,8 +12,10 @@ library(data.table)
 
 # check credentials exist
 checkCredentialsExist <- function() {
-  if(Sys.getenv("driver") != "" & Sys.getenv("username") != "" & Sys.getenv("password") != "" & Sys.getenv("dbname") != "" & Sys.getenv("host") != "" & Sys.getenv("port") != ""){
-    pass <- TRUE
+  env_vars <- c("driver", "username", "password", "dbname", "host", "port")
+
+  if (length(intersect(env_vars,names(Sys.getenv()))) == length(env_vars)) {
+      pass <- TRUE
 
     # load required drivers
     if (Sys.getenv("driver")=="MySQL") {
@@ -39,7 +41,8 @@ checkOMOPconnection <- function() {
   status<- tryCatch(
     {
       drv <- dbDriver(Sys.getenv("driver"))
-      con <- dbConnect(drv, user=Sys.getenv("username"), password=Sys.getenv("password"), dbname=Sys.getenv("dbname"), host=Sys.getenv("host"), port = as.integer(Sys.getenv("port")))
+      fullConnectString <- setConnectFunction()
+      con <- eval(parse(text = fullConnectString))
     },
     warning = function(w) {
       # ignore
@@ -70,7 +73,8 @@ checkOMOPtables <- function() {
   necessaryTables = c("concept","concept_ancestor","concept_relationship","condition_occurrence","death","device_exposure","drug_exposure","measurement","observation","person","procedure_occurrence","visit_occurrence")
 
   drv <- dbDriver(Sys.getenv("driver"))
-  con <- dbConnect(drv, user=Sys.getenv("username"), password=Sys.getenv("password"), dbname=Sys.getenv("dbname"), host=Sys.getenv("host"), port = as.integer(Sys.getenv("port")))
+  fullConnectString <- setConnectFunction()
+  con <- eval(parse(text = fullConnectString))
   foundTablesData <- dbListTables(con)
   on.exit(dbDisconnect(con))
 

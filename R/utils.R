@@ -9,12 +9,36 @@ standard_concepts <- function(){
   data.table("domain_type"= c("Measurement","Condition","Drug","Observation","Device","Procedure"),"concepts"= c("LOINC,SNOMED,CPT4","SNOMED","RxNorm,CPT4,NDC","SNOMED,CPT4,LOINC,HCPCS","SNOMED,HCPCS","SNOMED,CPT4,HCPCS"))
 }
 
+### funciton to indicate which variables to add to dbConnect function based on whether they are defined ###
+setConnectFunction <- function() {
+  env_vars <- c("username", "password", "host", "port") # 'driver' and 'dbname' need to be defined
+  connectString <- 'dbname=Sys.getenv("dbname")'
+  if (Sys.getenv("username") != ""){
+    connectString <- paste0(connectString, ', user=Sys.getenv("username")')
+  }
+  if (Sys.getenv("password") != ""){
+    connectString <- paste0(connectString, ', password=Sys.getenv("password")')
+  }
+  if (Sys.getenv("host") != ""){
+    connectString <- paste0(connectString, ', host=Sys.getenv("host")')
+  }
+  if (Sys.getenv("port") != ""){
+    connectString <- paste0(connectString, ', port= as.integer(Sys.getenv("port"))')
+  }
+
+  fullConnectString <- paste0('DBI::dbConnect(drv, ', connectString , ')')
+
+  return(fullConnectString)
+}
+
+
 ### general query function ###
 sqlQuery <- function(query) {
 
   # creating connection object
-  drv <- DBI::dbDriver(Sys.getenv("driver"))
-  con <- DBI::dbConnect(drv, user=Sys.getenv("username"), password=Sys.getenv("password"), dbname=Sys.getenv("dbname"), host=Sys.getenv("host"), port = as.integer(Sys.getenv("port")))
+  drv <- dbDriver(Sys.getenv("driver"))
+  fullConnectString <- setConnectFunction()
+  con <- eval(parse(text = fullConnectString))
 
   # close db connection after function call exits
   on.exit(DBI::dbDisconnect(con))
