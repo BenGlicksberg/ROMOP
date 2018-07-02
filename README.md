@@ -27,9 +27,33 @@ the concepts in these ontologies and identify ideal search terms of
 interest.
 
 ![Features of
-ROMOP](/Users/bglicksberg/Desktop/Ben%20Glicksberg/Butte%20Lab/Manuscripts/ROMOP/figure1a.png)
+ROMOP](/Users/bglicksberg/Desktop/Ben%20Glicksberg/Butte%20Lab/Manuscripts/ROMOP/figure1a_v3.png)
 
-\[Manuscript Information\]
+Manuscript information:  
+Glicksberg BS, Oskotsky B, Giangreco N^, Thangaraj PM^, Rudrapatna V,
+Datta D, Frazier R, Lee N, Larsen R, Tatonetti NP, Butte1 AJ: ROMOP: a
+light-weight R package for interfacing with OMOP-formatted Electronic
+Health Record data (in review)
+
+## Sandbox Server
+
+The Centers for Medicare and Medicaid Services (CMS) have released a
+synthetic clinical dataset
+[DE-SynPUF](https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SynPUFs/DE_Syn_PUF.html))
+in the public domain with the aim of being reflective of the patient
+population but containing no protected health information. The OHDSI
+group has underwent the task of converting these data into the [OMOP CDM
+format](https://github.com/OHDSI/ETL-CMS). Users are certainly able to
+set up this configuration on their own system following the instructions
+on the GitHub page. We obtained all data files from the [OHDSI FTP
+server](ftp://ftp.ohdsi.org/synpuf) (accessed June 17th, 2018) and
+created the CDM (DDL and indexes) according to their [official
+instructions](https://github.com/OHDSI/CommonDataModel/tree/master/PostgreSQL),
+but modified for MySQL. For space considerations, we only uploaded one
+million rows of each of the data files. The sandbox server is an Amazon
+Web Services (AWS) Elastic Compute Cloud (EC2) running Rshiny querying a
+MySQL database server AWS Relational Database Service (RDS) for Aurora
+(MySQL).
 
 ## Requirements
 
@@ -122,7 +146,7 @@ will now check for 3 conditions to be met:
 
 1.  Check that the credentials exist and can be retrieved from .Renviron
     file:  
-    *requires driver, host, username, password, dbname, and port \!= “”*
+    *requires driver, host, username, password, dbname, and port exist*
 
 2.  Check that connection to OMOP EHR server and database can be made:  
     *uses the above credentails*
@@ -767,7 +791,7 @@ We will detail the respective output files that are derived from Simple
 ## Code Breakdown
 
 ![Workflow of ROMOP
-functionality](/Users/bglicksberg/Desktop/Ben%20Glicksberg/Butte%20Lab/Manuscripts/ROMOP/figure1b.png)
+functionality](/Users/bglicksberg/Desktop/Ben%20Glicksberg/Butte%20Lab/Manuscripts/ROMOP/figure1b_v3.png)
 
 ROMOP first requires the creation a data dictionary (using
 [makeDataOntology](#makedataontology) function) of the ontology (from
