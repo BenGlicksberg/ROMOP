@@ -158,7 +158,8 @@ will now check for 3 conditions to be met:
 
 <!-- end list -->
 
-    "concept","concept_ancestor","concept_relationship","condition_occurrence","death","device_exposure","drug_exposure","measurement","observation","person","procedure_occurrence","visit_occurrence"
+    "concept","concept_ancestor","concept_relationship","condition_occurrence","death",
+    "device_exposure","drug_exposure","measurement","observation","person","procedure_occurrence","visit_occurrence"
 
   - if any of the above tables are missing, a warning message will be
     produced and the package will not be able to load properly.
@@ -171,12 +172,12 @@ will now check for 3 conditions to be met:
 Successfully pasing all checks will allow the user to begin using ROMOP.
 
 1.  Set an output directory to use with the
-    [changeOutDirectory](#changeoutdirectory) fucntion (note: the
-    default output directory will be decalred on package load).  
+    [changeOutDirectory](#changeoutdirectory) function (note: the
+    default output directory will be declared on package load).  
 2.  Create/load the Data ontology (required to decode data types) using
     the [makeDataOntology](#makedataontology). For the first time
     running this package, the concept ontology will have to first be
-    built, but if the store\_ontology option is selected, the onotlogy
+    built, but if the store\_ontology option is selected, the ontology
     will be saved as an .rds file for subsequent loading.
 
  
@@ -191,7 +192,7 @@ Successfully pasing all checks will allow the user to begin using ROMOP.
 **person** and **death** tables. Option to restrict to patientlist of
 interest.
 
-*Useage*:  ptDemo \<- getDemographics(patient\_list=NULL,declare=TRUE)
+*Usage*:  ptDemo \<- getDemographics(patient\_list=NULL,declare=TRUE)
 
 *Arguments*:
 
@@ -220,7 +221,7 @@ birth\_datetime, age, Gender, Race, Ethnicity, death\_date, Status
 *Description*:  Retrieves and formats patient encounter data from the
 **visit\_occurrence** table. Requires patientlist input.
 
-*Useage*:  ptEncs \<- getEncounters(patient\_list,declare=TRUE)
+*Usage*:  ptEncs \<- getEncounters(patient\_list,declare=TRUE)
 
 *Arguments*:
 
@@ -250,7 +251,7 @@ admitting\_concept, discharge\_concept
 a patientlist. Wrapper for domain-specific getData functions (which can
 also be used separately).
 
-*Useage*:  ptClinicalData \<- getClinicalData(patient\_list,
+*Usage*:  ptClinicalData \<- getClinicalData(patient\_list,
 declare=TRUE)
 
 *Arguments*:
@@ -298,7 +299,7 @@ ptClinicalData$Condition, ptClinicalData$Observation, etc…)
 data inclusion (and exclusion, if desired) criteria. Flexible to allow
 for multiple data types, vocabularies, and concepts.
 
-*Useage*:   patientlist \<- findPatients(strategy\_in=“mapped”,
+*Usage*:   patientlist \<- findPatients(strategy\_in=“mapped”,
 vocabulary\_in, codes\_in, function\_in = “or”, strategy\_out = NULL,
 vocabulary\_out = NULL, codes\_out = NULL, function\_out = NULL,
 declare=FALSE, save=FALSE, out\_name=NULL)
@@ -332,7 +333,7 @@ indicates no exclusion criteria.
          comma-separated string of relevant vocabularies for exclusion
 criteria. NULL indicates no exclusion criteria.
 
-  codes\_our         *specific concept codes for exclusion criteria* or
+  codes\_out         *specific concept codes for exclusion criteria* or
 NULL (default)  
          semi-colon separated string of code concepts for inclusion
 criteria, corresponding to the order for vocabulary\_out. Multiple codes
@@ -409,7 +410,7 @@ exclusion criteria if entered).
 Ontology and all function output. Option to create directory if does not
 exist.
 
-*Useage*:  changeOutDirectory(outdir=“path/to/directory”, create=FALSE)
+*Usage*:  changeOutDirectory(outdir=“path/to/directory”, create=FALSE)
 
 *Arguments*:  
   outdir         directory path
@@ -433,7 +434,7 @@ directory
 *Description*:  Creates general Data Ontology used by all data tables
 from the **concept** table. Option to save/load.
 
-*Useage*:  dataOntology \<-
+*Usage*:  dataOntology \<-
 makeDataOntology(declare=TRUE,store\_ontology=FALSE)
 
 *Arguments*:  
@@ -470,7 +471,7 @@ makeDataOntology(declare=TRUE,store\_ontology=FALSE)
 *Description*:  Summarizes patient demographic data from the
 [getDemographics](#getdemographics) function.
 
-*Useage*:  summarizeDemographics(ptDemo)
+*Usage*:  summarizeDemographics(ptDemo)
 
 *Arguments*:
 
@@ -491,7 +492,7 @@ relevant patient demographic data.
 dataOntology to have been created (via
 [makeDataOntology](#makedataontology)).
 
-*Useage*:  showDataTypes()
+*Usage*:  showDataTypes()
 
 *Arguments*:
 
@@ -509,7 +510,7 @@ Condition, Observation, Measurement, Device, Procedure, Drug.
 *Description*:  For given vocabulary and concept, returns the mapped
 standard concept(s) as well as decendent concept(s)
 
-*Useage*:  conceptsInfo \<- exploreConcepts(vocabulary, codes)
+*Usage*:  conceptsInfo \<- exploreConcepts(vocabulary, codes)
 
 *Arguments*:
 
@@ -887,10 +888,6 @@ ATC) for search criteria.
     N03AE) as well as the relevant Substance (SNOMED) codes (e.g.,
     16047007). The [exploreConcepts](#exploreconcepts) function can be
     used to identify and prioiritize which codes are optimal to use.
-
-## Team
-
-To Do
 
 ## License
 
