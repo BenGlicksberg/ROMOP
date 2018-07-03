@@ -50,10 +50,9 @@ server](ftp://ftp.ohdsi.org/synpuf) (accessed June 17th, 2018) and
 created the CDM (DDL and indexes) according to their [official
 instructions](https://github.com/OHDSI/CommonDataModel/tree/master/PostgreSQL),
 but modified for MySQL. For space considerations, we only uploaded one
-million rows of each of the data files. The sandbox server is an Amazon
-Web Services (AWS) Elastic Compute Cloud (EC2) running Rshiny querying a
-MySQL database server AWS Relational Database Service (RDS) for Aurora
-(MySQL).
+million rows of each of the data files. The sandbox server is a Rshiny
+server running as an Elastic Compute Cloud (EC2) instance on Amazon Web
+Services (AWS) querying a MySQL database server (AWS Aurora MySQL).
 
 ## Requirements
 
