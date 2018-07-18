@@ -430,7 +430,7 @@ getDevices <- function(patient_list, declare=FALSE) {
       patient_list <- paste(patient_list, collapse = ",")
     }
 
-    queryStatement <- paste0('SELECT person_id, device_concept_id, device_exposure_start_datetime, device_exposure_end_datetime, device_type_concept_id, device_source_value, visit_occurrence_id, device_source_concept_id FROM device_exposure WHERE person_id IN (', patient_list,') ');
+    queryStatement <- paste0('SELECT person_id, device_concept_id, device_exposure_start_datetime, device_exposure_end_datetime, device_type_concept_id, device_source_value, visit_occurrence_id, device_source_concept_id FROM device_exposure WHERE person_id IN (', patient_list,') ')
 
     if (declare==TRUE) {message("Loading Devices data...")}
     ptDeviceData <- sqlQuery(queryStatement)
