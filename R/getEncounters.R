@@ -46,9 +46,9 @@ getEncounters <- function(patient_list, declare=FALSE) {
       names(ptEncs)[names(ptEncs) == 'concept_name'] <- 'discharge_concept' # rename column
       ptEncs <- ptEncs[,-"discharge_to_concept_id"]
 
-      return(ptEncs)
-
     }
+
+    return(ptEncs)
 
   } else { #endif dataOntology exists
     message("Error: dataOntology does not exist. Please first run makeDataOntology.")
