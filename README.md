@@ -141,8 +141,15 @@ dbname = ""
 port = "3306" 
 ```
 
-  - driver: “MySQL” or “PostgreSQL”
-  - dbname: OMOP EHR database name
+  - driver (case insensitive): “mysql” for MySQL or (according to [OHDSI
+    DatabaseConnector
+    package](https://github.com/OHDSI/DatabaseConnector)) “postgresql”
+    for PostgreSQL, “oracle” for Oracle, “sql server” for Microsoft SQL
+    Server, “redshift” for Amazon Redshift, “pdw” for Microsoft Parallel
+    Data Warehouse, or “bigquery” for Google BigQuery.  
+  - host (or server depending on database format)  
+  - dbname: OMOP EHR database name (or schema depending on database
+    format)
 
 Note that this .Renviron file has to be in the same directory where R is
 launched. If already using an .Renviron file, add this information to
