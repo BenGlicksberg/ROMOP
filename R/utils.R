@@ -38,7 +38,7 @@ sqlQuery <- function(query) {
   if (tolower(Sys.getenv("driver"))=="mysql") {
 
     # creating connection object
-    drv <- dbDriver(Sys.getenv("driver"))
+    drv <- dbDriver("MySQL")
     fullConnectString <- setConnectFunction()
     con <- eval(parse(text = fullConnectString))
 
