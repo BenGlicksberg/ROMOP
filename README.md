@@ -1,7 +1,7 @@
 ROMOP Readme
 ================
 Benjamin S. Glicksberg
-6/22/2018
+9/14/2018
 
 ## ROMOP
 
@@ -59,9 +59,12 @@ Services (AWS) querying a MySQL database server (AWS Aurora MySQL).
 #### Clinical Data
 
 ROMOP requires EHR data to be in OMOP format and on a server accessible
-to by the user. In it’s current form, ROMOP requires the database to be
-in either *MySQL* or *PostgreSQL* format, but subsequent releases will
-allow for other formats.
+to by the user. In it’s current form, ROMOP can connect to databases in
+*MySQL* using the RMySQL driver or many other formats, including
+*Oracle*, *PostgreSQL*, *Microsoft SQL Server*, *Amazon Redshift*,
+*Google BigQuery*, and *Microsoft Parallel Data Warehouse*, through
+utilization of the DatabaseConnector and SqlRender packages developed by
+the OHDSI group (see below).
 
 Users without access to EHR data might consider using synthetic public
 data following the instructions provided by the OHDSI group
@@ -83,12 +86,19 @@ ROMOP requires the following R packages:
     (developed on version 1.10.4-3).
   - [dplyr](https://dplyr.tidyverse.org/) (developed on version 0.7.4).
 
-Driver-specific (i.e., one or the other):
+Driver-specific:
 
   - [RMySQL](https://cran.r-project.org/web/packages/RMySQL/index.html)
     (developed on version
     0.10.14).
-  - [PostgreSQL](https://cran.r-project.org/web/packages/RPostgreSQL/index.html)
+  - [DatabaseConnector](https://cran.r-project.org/web/packages/DatabaseConnector/index.html)
+    (developed on version
+    2.2.0)
+  - [DatabaseConnectorJars](https://cran.r-project.org/web/packages/DatabaseConnectorJars/index.html)
+    (developed on version
+    1.0.0)
+  - [SqlRender](https://cran.r-project.org/web/packages/SqlRender/index.html)
+    (developed on version 1.5.2)
 
 ## Installation
 

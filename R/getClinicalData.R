@@ -39,7 +39,6 @@ getClinicalData<- function(patient_list, declare=FALSE) {
 }
 
 
-
 #################################  modality specific functions
 
 #' Retrieves all patient clinical data from Observations table

@@ -2,6 +2,7 @@ library(DBI)
 library(odbc)
 library(data.table)
 
+
 ### securely retrieve credentials stored in environment variables
 # ~/.Renviron
 
@@ -18,13 +19,14 @@ checkCredentialsExist <- function() {
       pass <- TRUE
 
     # load required drivers
-    if (Sys.getenv("driver")=="MySQL") {
-      library("RMySQL")
-    } else if (Sys.getenv("driver")=="PostgreSQL") {
-      library("RPostgreSQL")
+    if (tolower(Sys.getenv("driver"))=="mysql") {
+      library(RMySQL)
+    } else if (tolower(Sys.getenv("driver")) %in% c("oracle", "postgresql", "redshift", "sql server", "pdw", "bigquery")) {
+      library(DatabaseConnector)
+      library(SqlRender)
     } else {
       pass <- FALSE
-      message("Invalid driver type, please select only 'MySQL' or 'PostgreSQL'")
+      message("Invalid driver type, please select either: 'mysql', 'oracle',  'postgresql', 'redshift', 'sql server', 'pdw', 'bigquery'")
     }
 
   }else{
@@ -40,9 +42,18 @@ checkOMOPconnection <- function() {
 
   status<- tryCatch(
     {
-      drv <- dbDriver(Sys.getenv("driver"))
-      fullConnectString <- setConnectFunction()
-      con <- eval(parse(text = fullConnectString))
+      if (tolower(Sys.getenv("driver"))=="mysql") {
+        drv <- dbDriver(Sys.getenv("driver"))
+        fullConnectString <- setConnectFunction()
+        con <- eval(parse(text = fullConnectString))
+      } else {
+      # creating connection object using DatabaseConnector
+      con <- DatabaseConnector::connect(dbms = tolower(Sys.getenv("driver")),
+                        server = Sys.getenv("host"),
+                        user = Sys.getenv("username"),
+                        password = Sys.getenv("password"),
+                        schema = Sys.getenv("dbname"))
+      }
     },
     warning = function(w) {
       # ignore
@@ -60,8 +71,11 @@ checkOMOPconnection <- function() {
     out <- FALSE
   }
 
-  on.exit(dbDisconnect(con))
-
+  if (tolower(Sys.getenv("driver"))=="mysql") {
+    on.exit(dbDisconnect(con))
+  } else {
+    on.exit(DatabaseConnector::disconnect(con))
+  }
   return(out)
 
 }
@@ -72,11 +86,27 @@ checkOMOPtables <- function() {
 
   necessaryTables = c("concept","concept_ancestor","concept_relationship","condition_occurrence","death","device_exposure","drug_exposure","measurement","observation","person","procedure_occurrence","visit_occurrence")
 
-  drv <- dbDriver(Sys.getenv("driver"))
-  fullConnectString <- setConnectFunction()
-  con <- eval(parse(text = fullConnectString))
-  foundTablesData <- dbListTables(con)
-  on.exit(dbDisconnect(con))
+  if (tolower(Sys.getenv("driver"))=="mysql") {
+    drv <- dbDriver(Sys.getenv("driver"))
+    fullConnectString <- setConnectFunction()
+    con <- eval(parse(text = fullConnectString))
+  } else {
+    # creating connection object using DatabaseConnector
+    con <- DatabaseConnector::connect(dbms = tolower(Sys.getenv("driver")),
+                   server = Sys.getenv("host"),
+                   user = Sys.getenv("username"),
+                   password = Sys.getenv("password"),
+                   schema = Sys.getenv("dbname"))
+  }
+
+  foundTablesData <- tolower(dbListTables(con))
+
+  if (tolower(Sys.getenv("driver"))=="mysql") {
+    on.exit(dbDisconnect(con))
+  } else {
+    on.exit(DatabaseConnector::disconnect(con))
+  }
+
 
   missingTables <- FALSE
 
@@ -85,8 +115,12 @@ checkOMOPtables <- function() {
       missingTables <- TRUE
       message(paste0("missing required table: " , tbls ))
     } else { # check if any data in found table
-      dataCheckQuery <- paste0("SELECT * FROM " , tbls , " LIMIT 1;")
-      dataCheck <- sqlQuery(dataCheckQuery)
+      if (tolower(Sys.getenv("driver"))=="mysql") {
+        dataCheckQuery <- paste0("SELECT * FROM " , tbls , " LIMIT 1;")
+      } else {
+        dataCheckQuery <- paste0("SELECT TOP 1 * FROM " , tbls, ";")
+      }
+        dataCheck <- sqlQuery(dataCheckQuery)
       if (nrow(dataCheck)==0) {
         message(paste0("Warning: no data found in table ", tbls))
       }

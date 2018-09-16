@@ -35,20 +35,43 @@ setConnectFunction <- function() {
 ### general query function ###
 sqlQuery <- function(query) {
 
-  # creating connection object
-  drv <- dbDriver(Sys.getenv("driver"))
-  fullConnectString <- setConnectFunction()
-  con <- eval(parse(text = fullConnectString))
+  if (tolower(Sys.getenv("driver"))=="mysql") {
 
-  # close db connection after function call exits
-  on.exit(DBI::dbDisconnect(con))
+    # creating connection object
+    drv <- dbDriver(Sys.getenv("driver"))
+    fullConnectString <- setConnectFunction()
+    con <- eval(parse(text = fullConnectString))
 
-  # send query
-  res <-DBI::dbSendQuery(con, query)
+    # close db connection after function
+    on.exit(DBI::dbDisconnect(con))
 
-  # get elements from results
-  result <- DBI::fetch(res, -1)
+    # send query
+    res <-DBI::dbSendQuery(con, query)
 
+    # get elements from results
+    result <- DBI::fetch(res, -1)
+
+  } else {
+
+    # creating connection object using DatabaseConnector
+    con <- DatabaseConnector::connect(dbms = tolower(Sys.getenv("driver")),
+                   server = Sys.getenv("host"),
+                   user = Sys.getenv("username"),
+                   password = Sys.getenv("password"),
+                   schema = Sys.getenv("dbname"))
+
+    # close db connection after function
+    on.exit(DatabaseConnector::disconnect(con))
+
+    # translate query using SqlRender
+    translated_query <- SqlRender::translateSql(query, targetDialect = tolower(Sys.getenv("driver")))$sql
+
+    # query using DatabaseConnector function
+    result <- DatabaseConnector::querySql(con, translated_query)
+
+    # coerce columns to lowercase
+    colnames(result) <- tolower(colnames(result))
+  }
   return(result)
 }
 

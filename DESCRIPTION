@@ -1,15 +1,13 @@
 Package: ROMOP
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
+Title: A light-weight R package for interfacing with OMOP-formatted Electronic Health Record data
+Version: 0.2.0
 Author: Benjamin S. Glicksberg
 Maintainer: Benjamin S. Glicksberg <benjamin.glicksberg@ucsf.edu>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Description: ROMOP streamlines typical EHR-related data processes. Its functions include exploration of data types, extraction and summarization of patient clinical and demographic data, and patient searches using any CDM vocabulary concept.
+License: MIT License
 Encoding: UTF-8
 LazyData: true
-Imports: dplyr, data.table, DBI, odbc, RMySQL
-Suggests: RPostgreSQL
+Imports: dplyr, data.table, DBI, odbc, RMySQL, DatabaseConnector, DatabaseConnectorJars, SqlRender
 Depends: R (>= 3.4)
 RoxygenNote: 6.0.1
