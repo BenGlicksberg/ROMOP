@@ -77,8 +77,6 @@ ROMOP is built in the R environment and developed on version 3.4.4
 
 ROMOP requires the following R packages:
 
-  - [odbc](https://cran.r-project.org/web/packages/odbc/index.html)
-    (developed on version 1.1.5)
   - [DBI](https://cran.r-project.org/web/packages/DBI/index.html)
     (developed on version
     1.0.0)

@@ -6,7 +6,7 @@
 #' @param declare TRUE/FALSE will output status and data information during the process
 #'
 #' @return a list of tables for each all data within each domain (e.g., Condition) for all patients provided (can access by ptClinicalData$Condition).
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples
@@ -49,7 +49,7 @@ getClinicalData<- function(patient_list, declare=FALSE) {
 #' @param declare TRUE/FALSE will output status and data information during the process
 #'
 #' @return a table of relevant clinical data contained with in the 'observation' table
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples
@@ -124,7 +124,7 @@ getObservations <- function(patient_list, declare=FALSE) {
 #' @param declare TRUE/FALSE will output status and data information during the process
 #'
 #' @return a table of relevant clinical data contained with in the 'condition_occurrence' table
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples
@@ -200,7 +200,7 @@ getConditions <- function(patient_list, declare=FALSE) {
 #' @param declare TRUE/FALSE will output status and data information during the process
 #'
 #' @return a table of relevant clinical data contained with in the 'procedure_occurrence' table
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples
@@ -268,7 +268,7 @@ getProcedures <- function(patient_list, declare=FALSE){
 #' @param declare TRUE/FALSE will output status and data information during the process
 #'
 #' @return a table of relevant clinical data contained with in the 'drug_exposure' table
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples
@@ -340,7 +340,7 @@ getMedications <- function(patient_list, declare=FALSE) {
 #' @param declare TRUE/FALSE will output status and data information during the process
 #'
 #' @return a table of relevant clinical data contained with in the 'measurement' table
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples
@@ -416,7 +416,7 @@ getMeasurements <- function(patient_list, declare=FALSE) {
 #' @param declare TRUE/FALSE will output status and data information during the process
 #'
 #' @return a table of relevant clinical data contained with in the 'device_exposure' table
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples

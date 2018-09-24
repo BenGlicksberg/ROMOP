@@ -16,7 +16,7 @@
 #' @param out_name name assigned to search query or NULL (if save = TRUE, saves query using provided name. If the provided name already exists as a directory (or is NULL), the directory defaults to datetime name)
 #'
 #' @return List of patients that meet inclusion criteria (and not exclusion criteria if entered).
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples
@@ -444,7 +444,7 @@ findPatients <- function(strategy_in="mapped", vocabulary_in, codes_in, function
 
 ################## specific table search functions
 
-#' @import data.table DBI odbc
+#' @import data.table DBI
 searchCondition <- function(useSource,codes) {
   conditionQuery <- paste0('SELECT person_id, condition_concept_id FROM condition_occurrence WHERE condition',useSource,'_concept_id IN (',codes,') ')
   dataCondition <- sqlQuery(conditionQuery)
@@ -453,7 +453,7 @@ searchCondition <- function(useSource,codes) {
   return(dataCondition)
 }
 
-#' @import data.table DBI odbc
+#' @import data.table DBI
 searchObservation <- function(useSource,codes) {
   observationQuery <- paste0('SELECT person_id, observation_concept_id FROM observation WHERE observation',useSource,'_concept_id IN (',codes,') ')
   dataObservation <- sqlQuery(observationQuery)
@@ -462,7 +462,7 @@ searchObservation <- function(useSource,codes) {
   return(dataObservation)
 }
 
-#' @import data.table DBI odbc
+#' @import data.table DBI
 searchMeasurement <- function(useSource,codes) {
   measurementQuery <- paste0('SELECT person_id, measurement_concept_id FROM measurement WHERE measurement',useSource,'_concept_id IN (',codes,') ')
   dataMeasurement <- sqlQuery(measurementQuery)
@@ -471,7 +471,7 @@ searchMeasurement <- function(useSource,codes) {
   return(dataMeasurement)
 }
 
-#' @import data.table DBI odbc
+#' @import data.table DBI
 searchDrug <- function(useSource,codes) {
   drugQuery <- paste0('SELECT person_id, drug_concept_id FROM drug_exposure WHERE drug',useSource,'_concept_id IN (',codes,') ')
   dataDrug <- sqlQuery(drugQuery)
@@ -480,7 +480,7 @@ searchDrug <- function(useSource,codes) {
   return(dataDrug)
 }
 
-#' @import data.table DBI odbc
+#' @import data.table DBI
 searchDevice <- function(useSource,codes) {
   deviceQuery <- paste0('SELECT person_id, device_concept_id FROM device_exposure WHERE device',useSource,'_concept_id IN (',codes,') ')
   dataDevice <- sqlQuery(deviceQuery)
@@ -489,7 +489,7 @@ searchDevice <- function(useSource,codes) {
   return(dataDevice)
 }
 
-#' @import data.table DBI odbc
+#' @import data.table DBI
 searchProcedure<- function(useSource,codes) {
   procedureQuery <- paste0('SELECT person_id, procedure_concept_id FROM procedure_occurrence WHERE procedure',useSource,'_concept_id IN (',codes,') ')
   dataProcedure <- sqlQuery(procedureQuery)

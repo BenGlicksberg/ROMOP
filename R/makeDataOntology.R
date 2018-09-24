@@ -6,7 +6,7 @@
 #' @param store_ontology TRUE/FALSE If TRUE: will attempt to load .rds file from the current outDirectory; will create and save it if it does not exist. If FALSE: will build table.
 #'
 #' @return Returns a ontology table dictionary of concepts contained in the 'concept' table.
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples

@@ -8,6 +8,6 @@ Description: ROMOP streamlines typical EHR-related data processes. Its functions
 License: MIT License
 Encoding: UTF-8
 LazyData: true
-Imports: dplyr, data.table, DBI, odbc, RMySQL, DatabaseConnector, DatabaseConnectorJars, SqlRender
+Imports: dplyr, data.table, DBI, RMySQL, DatabaseConnector, DatabaseConnectorJars, SqlRender
 Depends: R (>= 3.4)
 RoxygenNote: 6.0.1

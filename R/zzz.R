@@ -1,5 +1,4 @@
 library(DBI)
-library(odbc)
 library(data.table)
 
 

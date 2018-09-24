@@ -5,7 +5,7 @@
 #' @param declare TRUE/FALSE will output status and data information during the process
 #'
 #' @return table of mapped encounter concepts for specific patients contained in a provided csv formmated string of ids.
-#' @import data.table DBI odbc
+#' @import data.table DBI
 #' @export
 #'
 #' @examples
