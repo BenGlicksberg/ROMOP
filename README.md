@@ -27,7 +27,7 @@ the concepts in these ontologies and identify ideal search terms of
 interest.
 
 ![Features of
-ROMOP](/Users/bglicksberg/Desktop/Ben%20Glicksberg/Butte%20Lab/Manuscripts/ROMOP/figure1a_v3.png)
+ROMOP](figure1a_v3.png)
 
 Manuscript information:  
 Glicksberg BS, Oskotsky B, Giangreco N^, Thangaraj PM^, Rudrapatna V,
@@ -806,7 +806,7 @@ We will detail the respective output files that are derived from Simple
 ## Code Breakdown
 
 ![Workflow of ROMOP
-functionality](/Users/bglicksberg/Desktop/Ben%20Glicksberg/Butte%20Lab/Manuscripts/ROMOP/figure1b_v3.png)
+functionality](figure1b_v3.png)
 
 ROMOP first requires the creation a data dictionary (using
 [makeDataOntology](#makedataontology) function) of the ontology (from
