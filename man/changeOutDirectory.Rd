@@ -18,5 +18,5 @@ none (called for side effect: sets outDirectory)
 Sets the current outDirectory which will store the Data Ontology and all function output. Option to create directory if does not exist.
 }
 \examples{
-changeOutDirectory(outdir=“~/”, create=FALSE)
+changeOutDirectory(outdir=“.”, create=FALSE)
 }
