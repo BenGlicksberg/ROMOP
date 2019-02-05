@@ -51,7 +51,8 @@ checkOMOPconnection <- function() {
                         server = Sys.getenv("host"),
                         user = Sys.getenv("username"),
                         password = Sys.getenv("password"),
-                        schema = Sys.getenv("dbname"))
+                        schema = Sys.getenv("dbname"),
+                        port = Sys.getenv("port"))
       }
     },
     warning = function(w) {
@@ -95,7 +96,8 @@ checkOMOPtables <- function() {
                    server = Sys.getenv("host"),
                    user = Sys.getenv("username"),
                    password = Sys.getenv("password"),
-                   schema = Sys.getenv("dbname"))
+                   schema = Sys.getenv("dbname"),
+                   port = Sys.getenv("port"))
   }
 
   foundTablesData <- tolower(dbListTables(con))
