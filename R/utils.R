@@ -58,7 +58,8 @@ sqlQuery <- function(query) {
                    server = Sys.getenv("host"),
                    user = Sys.getenv("username"),
                    password = Sys.getenv("password"),
-                   schema = Sys.getenv("dbname"))
+                   schema = Sys.getenv("dbname"),
+                   port = Sys.getenv("port"))
 
     # close db connection after function
     on.exit(DatabaseConnector::disconnect(con))
