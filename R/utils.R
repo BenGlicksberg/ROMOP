@@ -65,7 +65,7 @@ sqlQuery <- function(query) {
     on.exit(DatabaseConnector::disconnect(con))
 
     # translate query using SqlRender
-    translated_query <- SqlRender::translateSql(query, targetDialect = tolower(Sys.getenv("driver")))$sql
+    translated_query <- SqlRender::translate(query, targetDialect = tolower(Sys.getenv("driver")))
 
     # query using DatabaseConnector function
     result <- DatabaseConnector::querySql(con, translated_query)
