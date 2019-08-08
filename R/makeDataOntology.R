@@ -33,7 +33,7 @@ makeDataOntology <- function(declare=FALSE, store_ontology=FALSE) {
   }
 
   if (create == TRUE) {
-    conceptQuery <- "SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, concept_code FROM concept WHERE invalid_reason = '';"
+    conceptQuery <- "SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, concept_code FROM concept WHERE (invalid_reason = '' OR invalid_reason IS NULL);"
     dataOntology <- sqlQuery(conceptQuery)
     dataOntology <- data.table(dataOntology)
   }
