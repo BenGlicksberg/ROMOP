@@ -30,10 +30,7 @@ interest.
 ROMOP](www/figure1a_v3.png)
 
 Manuscript information:  
-Glicksberg BS, Oskotsky B, Giangreco N^, Thangaraj PM^, Rudrapatna V,
-Datta D, Frazier R, Lee N, Larsen R, Tatonetti NP, Butte1 AJ: ROMOP: a
-light-weight R package for interfacing with OMOP-formatted Electronic
-Health Record data (in review)
+Glicksberg BS, Oskotsky B, Giangreco N, Thangaraj PM, Rudrapatna V, Datta D, Frazier R, Lee N, Larsen R, Tatonetti NP, Butte AJ. ROMOP: a light-weight R package for interfacing with OMOP-formatted electronic health record data. JAMIA open. 2019 Apr;2(1):10-4.
 
 ## Sandbox Server
 
